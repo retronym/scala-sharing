@@ -4,69 +4,100 @@ import java.lang.invoke.{MethodHandles, VarHandle}
 import scala.quoted.*
 
 /** A field that publishes others: a writer stores them, then this field with release semantics; a reader loads this
- *  field with acquire semantics, then them, and sees what was stored before it (dotc's `Symbol.checkedPeriod`,
- *  publishing `lastDenot`; docs/_docs/internals/interactive-multi-reader.md §4.4.1).
+ *  field with acquire semantics, then them, and sees what was stored before it. Message passing through one field,
+ *  without a lock, as Java's `VarHandle.setRelease` and `getAcquire` give, with the field named at compile time.
  *
  *  Opaque, so that a plain read or write of the field does not type-check: the only ways in are `acquire`, `release`
- *  and, where the protocol allows a plain access, `plain` and `setPlain`, named so that they can be counted.
+ *  and, where the protocol allows a plain access, `plain` and `setPlain`, named so that they can be found and counted.
+ *
  *  {{{
- *  class Symbol:
- *    private var checkedPeriod: Published[Period] = Published(Nowhere)
- *    def denot(using Context) = if checkedPeriod.acquire == ctx.period then lastDenot else ...
- *    def denot_=(d: SymDenotation) = { lastDenot = d; checkedPeriod.release(Nowhere) }
- *  object Symbols:
- *    val checkedPeriodHandle: Published.Handle[Symbol, "checkedPeriod"] = Published.handle
- *    given Published.Handle[Symbol, "checkedPeriod"] = checkedPeriodHandle
+ *  class Entry:
+ *    private[mypkg] var version: Published[Int] = Published(0)
+ *    private var text: String = ""                      // published by `version`
+ *    def read(expected: Int): String | Null = if version.acquire == expected then text else null
+ *    def write(v: Int, t: String): Unit = { text = t; version.release(v) }
+ *
+ *  object Entry:
+ *    val versionHandle: Published.Handle[Entry, "version"] = Published.handle
+ *    given Published.Handle[Entry, "version"] = versionHandle
  *  }}}
- *  The handle is a `val` and the given a reference to it: an alias given computed in place is a lazy val, whose
- *  check every access would pay.
- *  The operations are macros: they take the field's owner and name from the call (`this.checkedPeriod`), and the
- *  field's `VarHandle` from the given `Handle[Owner, "name"]` declared in the owner's companion, so two fields of the
- *  same type have their own handles, chosen at compile time. A value class (`Period`) is stored as its underlying
- *  value, the field's erased type.
+ *
+ *  The handle is a `val` and the given a reference to it: an alias given computed in place is a lazy val, whose check
+ *  every access would pay. The operations are macros: they take the field's owner and name from the call
+ *  (`this.version`), and the field's `VarHandle` from the given `Handle[Owner, "name"]` declared in the owner's
+ *  companion, so two fields of the same type have their own handles, chosen at compile time. A value class is stored as
+ *  its underlying value, the field's erased type. The field must not be `private`: the compiler drops a private field
+ *  that no code reads or writes but through the handle, so `handle` rejects one; `private[pkg]` is kept. Supported: `Int`, `Long`, `Boolean`, references, and value classes
+ *  over them.
+ *
+ *  To have the compiler check the fields it publishes too, make them [[Payload]]s.
+ *
+ *  @tparam T the type of the field's value
  */
 opaque type Published[T] = T
 
 object Published extends PublishedOps:
 
-  /** The field's initial value, stored before its owner is shared. */
+  /** The field's initial value, stored before its owner is shared.
+   */
   inline def apply[T](t: T): Published[T] = t
 
-  /** The `VarHandle` of field `F` of class `O`, declared once, as a given in `O`'s companion. Opaque over the handle
-   *  itself, not a class holding it: C2 folds a handle in an object's field, as one in a `static final` field, and
-   *  inlines `getAcquire` to the `Unsafe` intrinsic, but not one a field further away (measured: a `Handle` class
-   *  around it left `linkToStatic` uninlined, "member_name not constant", 8 times slower). */
+  /** The `VarHandle` of field `F` of class `O`, declared once, as a given in `O`'s companion.
+   *
+   *  Opaque over the handle itself, not a class holding it: C2 folds a handle in an object's field, as one in a
+   *  `static final` field, and inlines `getAcquire` to the `Unsafe` intrinsic, but not one a field further away (measured:
+   *  a class around the handle left the call uninlined, 8 times slower).
+   *
+   *  @tparam O the class that declares the field
+   *  @tparam F the field's name, as a literal type
+   */
   // a `VarHandle` everywhere (the bound), distinguished by owner and field only for the givens
   opaque type Handle[O, F <: String] <: VarHandle = VarHandle
   object Handle:
     inline def apply[O, F <: String](vh: VarHandle): Handle[O, F] = vh
 
-  /** The handle of field `F` of class `O`, found at class initialisation: a macro, so that a field that is not
-   *  there, or not `Published`, is a compile error. */
+  /** The handle of field `F` of class `O`, looked up when the companion is initialised. A macro, so that a field that is
+   *  not there, or not a `Published`, is a compile error.
+   */
   inline def handle[O, F <: String]: Handle[O, F] = ${ PublishedMacros.handleImpl[O, F] }
 
-  /** The value of `S`'s publisher `F` (`S` the owner's singleton type), loaded with acquire semantics: the evidence
-   *  a `Payload` of `F` is read after (`checkedPeriod.acquired`, `lastDenot.after(snap)`). It need not be used at
-   *  once: a read after an acquire stays ordered after it, so evidence that outlives its block is still sound. */
+  /** The value of `S`'s publisher `F` (`S` the owner's singleton type), loaded with acquire semantics: the evidence that
+   *  a [[Payload]] of `F` is read after it (`version.acquired`, then `text.after(snap)`).
+   *
+   *  It need not be used at once: a read after an acquire stays ordered after it, so evidence that outlives its block is
+   *  still sound.
+   */
   opaque type Acquired[S, F <: String, T] = T
 
-  /** Evidence that a store runs inside a `publishing` block, before the release that ends it: what `:=` on a
-   *  `Payload` needs. A block's evidence may only be passed to `:=` in it: the macro rejects any other use. */
+  /** Evidence that a store runs inside a `publishing` block, before the release that ends it: what `:=` on a [[Payload]]
+   *  needs. A block's evidence may only be passed to `:=` in it: the macro rejects any other use.
+   */
   opaque type Publishing = AnyRef
 
-/** A field published by its owner's `Published` field `F`: stored only in a `publishing` block of `F` (before its
+/** A field published by its owner's [[Published]] field `F`: stored only in a `publishing` block of `F` (before its
  *  release), read only after an `acquired` of `F` on the same object, or with `peek` where an unordered read is the
  *  protocol (a hint checked again after).
+ *
  *  {{{
- *  private var lastDenot: Payload[Symbol, "checkedPeriod", SymDenotation] = Payload(uninitialized)
- *  private var checkedPeriod: Published[Period] = Published(Nowhere)
- *  // reader
- *  val p = checkedPeriod.acquired
- *  if p.value == ctx.period then lastDenot.after(p) else ...
- *  // writer
- *  checkedPeriod.publishing(ctx.period):
- *    lastDenot := newd
+ *  class Entry:
+ *    private[mypkg] var version: Published[Int] = Published(0)
+ *    private var text: Payload[Entry, "version", String] = Payload("")
+ *
+ *    def read(expected: Int): String | Null =
+ *      val snap = version.acquired
+ *      if snap.value == expected then text.after(snap) else null
+ *
+ *    def write(v: Int, t: String): Unit =
+ *      version.publishing(v):
+ *        text := t
  *  }}}
+ *
+ *  Each misuse is a compile error: a plain read or store of `text`, a store outside the block, a store in a block of
+ *  another object's publisher, a read after another object's acquire, and the block's evidence kept past it.
+ *
+ *  @tparam O the class that declares the field
+ *  @tparam F the name of the publisher, as a literal type
+ *  @tparam T the type of the field's value
  */
 opaque type Payload[O, F <: String, T] = T
 
@@ -74,26 +105,32 @@ object Payload extends PayloadOps:
   /** The field's initial value, stored before its owner is shared. */
   inline def apply[O, F <: String, T](t: T): Payload[O, F, T] = t
 
-/** The operations on a `Payload` field, outside the opaque scope as `PublishedOps` are. */
+/** The operations on a [[Payload]] field, outside the opaque scope as [[PublishedOps]] are.
+ */
 trait PayloadOps:
   import Published.{Acquired, Publishing}
 
   extension [O, F <: String, T](inline field: Payload[O, F, T])
 
-    /** The field, read after `snap`, the acquire of its publisher on the same object: a macro, which checks that
-     *  `snap` is of the field's owner. */
+    /** The field, read after `snap`, the acquire of its publisher on the same object. A macro, which checks that `snap`
+     *  is of the field's owner.
+     */
     inline def after[S, V](snap: Acquired[S, F, V]): T = ${ PublishedMacros.afterImpl[S, F, T]('field, 'snap) }
 
-    /** The field, read with no order: only where the protocol allows it (a hint checked again after). */
+    /** The field, read with no order: only where the protocol allows it (a hint checked again after).
+     */
     inline def peek: T = ${ PublishedMacros.payloadPeekImpl[T]('field) }
 
-    /** Stores `v` in the field, inside a `publishing` block of its publisher, before the release that ends it. */
+    /** Stores `v` in the field, inside a `publishing` block of its publisher, before the release that ends it.
+     */
     inline def :=(inline v: T)(using Publishing): Unit = ${ PublishedMacros.payloadStoreImpl[O, F, T]('field, 'v) }
 
-/** The operations on a `Published` field, inherited by its companion, so found with no import. Defined outside the
- *  opaque types' scope: an inline method inside it leaves the inliner's proxy for the scope, a dead load of
- *  `Published`'s module, at every call site. The macros see through `Published[T]` and `Handle` where they need to
- *  (each erases to what it is over). */
+/** The operations on a [[Published]] field, inherited by its companion, so found with no import.
+ *
+ *  Defined outside the opaque types' scope: an inline method inside it leaves the inliner's proxy for the scope, a dead
+ *  load of `Published`'s module, at every call site. The macros see through `Published[T]` and `Handle` where they need
+ *  to (each erases to what it is over).
+ */
 trait PublishedOps:
 
   extension [T](inline field: Published[T])
@@ -235,6 +272,9 @@ private[sharing] object PublishedMacros:
       case t => report.errorAndAbort(s"a field name as a literal type, not ${t.show}")
     val fld = cls.fieldMember(name)
     if !fld.exists then report.errorAndAbort(s"${cls.name} has no field `$name`")
+    // the compiler drops a private field that no code reads or writes but through the handle
+    if fld.flags.is(Flags.Private) then
+      report.errorAndAbort(s"${cls.name}.$name is private, and a private field reached only through its handle is dropped: make it private[${cls.owner.name}]")
     val tpe = TypeRepr.of[O].memberType(fld)
     val content = tpe match
       case AppliedType(p, List(t)) if p.typeSymbol.name == "Published" && p.typeSymbol.owner.fullName.startsWith("io.github.retronym.sharing") => t

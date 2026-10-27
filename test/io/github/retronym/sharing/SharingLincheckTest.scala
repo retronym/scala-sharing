@@ -23,12 +23,12 @@ import org.junit.Test
  *  that breaking a promise shows in a result: a number returned twice, a cycle where there is none, a `false`.
  *
  *  A claim is taken from the `ClaimRegistry` given, and each section runs on two that keep the registry's contract
- *  (one holder per key, re-entry by the holder runs at once), the two shapes dotc's take:
+ *  (one holder per key, re-entry by the holder runs at once), the two shapes a registry takes (`CoarseLock` and `PerKeyClaims` are the library's):
  *
- *  - `OneLock`, one reentrant lock for every key whose kind says serialised threads take it, as the completion lock;
- *  - `LockPerKey`, a reentrant lock per key, as the completion roots, without their wait-for cycle check (no
- *    section claims keys in opposite orders; `SharingOnCompletionRootsLincheckTest` runs these sections, and one that
- *    does, on dotc's registry).
+ *  - `OneLock`, one reentrant lock for every key whose kind says serialised threads take it, as `CoarseLock` does;
+ *  - `LockPerKey`, a reentrant lock per key, as `PerKeyClaims`, without its wait-for cycle check (no section
+ *    claims keys in opposite orders; `SharingOnPerKeyClaimsLincheckTest` runs these sections, and one that does, on
+ *    `PerKeyClaims` itself).
  *
  *  Each is checked two ways: model checking explores the interleavings of a scenario under sequential consistency
  *  (it finds orderings, not missing fences); stress runs real threads (on Apple silicon, so weak memory too).
@@ -128,7 +128,7 @@ object SharingLincheckTest:
   class OneLockOnce extends BlackHoleOnce(using OneLock())
   class LockPerKeyOnce extends BlackHoleOnce(using LockPerKey())
 
-  /** `LazyRef` before I97: a "started" flag, set as the computation begins, that a computation which unwound left
+  /** A lazy reference with a "started" flag, set as the computation begins, that a computation which unwound left
    *  set, so the next reader reported a cycle. */
   class OnceLeftStarted extends Once(using LockPerKey()):
     private var started = false
@@ -228,7 +228,7 @@ object SharingLincheckTest:
 
   // ---- the registries
 
-  /** One reentrant lock, taken for a key whose kind says serialised threads take it: dotc's completion lock. */
+  /** One reentrant lock, taken for a key whose kind says serialised threads take it: as `CoarseLock` is. */
   final class OneLock extends ClaimRegistry:
     private val lock = ReentrantLock()
     def claim[T](key: AnyRef, kind: Sharing.ClaimKind[Nothing], cycleSubject: AnyRef, op: () => T): T =
@@ -237,7 +237,7 @@ object SharingLincheckTest:
         try op() finally lock.unlock()
       else op()
 
-  /** A reentrant lock per key: dotc's completion roots, without the wait-for cycle check. The lock is the key's own
+  /** A reentrant lock per key: as `PerKeyClaims`, without the wait-for cycle check. The lock is the key's own
    *  (a `Lockable`), not found in a map, so that a claim is one lock under model checking (a map walk on every claim
    *  makes a long operation, which Lincheck reads as a hang).
    */

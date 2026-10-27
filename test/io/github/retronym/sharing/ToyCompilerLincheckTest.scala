@@ -7,7 +7,7 @@ import org.junit.Test
 
 import SharingLincheckTest.{Key, LockPerKey, Lockable, OneLock, checkEveryWay}
 
-/** `Sharing`'s operations at work in a toy compiler: the shape of dotc's symbol table, a graph that is made and
+/** `Sharing`'s operations at work in a toy compiler: the shape of a compiler's symbol table, a graph that is made and
  *  evaluated lazily, read by several threads at once.
  *
  *  The toy and what it stands for:
@@ -25,8 +25,8 @@ import SharingLincheckTest.{Key, LockPerKey, Lockable, OneLock, checkEveryWay}
  *    and a key per symbol for its info, as a `LazyRef` is its own key. A computation claims the facts it reads while
  *    it holds its own claim, so claims nest along the graph's edges, as completions nest: an info's claim holds over
  *    its members' completion and their infos' claims, and over the shared leaf's, which another thread may hold.
- *  - The registry is the base's: one coarse lock for serialised readers, a claim per key for parallel ones, and,
- *    in `SharingOnCompletionRootsLincheckTest`, dotc's completion roots themselves.
+ *  - The registry is the base's: one coarse lock for serialised readers, a claim per key for parallel ones, and, in
+ *    `SharingOnPerKeyClaimsLincheckTest`, `PerKeyClaims` itself.
  *
  *  The specification is the toy itself in `Mode.Batch`: there every operation is the code it was before
  *  concurrency, so a batch toy is what the batch compiler computes. The graph is a tree of depth 2, two members a

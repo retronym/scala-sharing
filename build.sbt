@@ -2,6 +2,9 @@ ThisBuild / scalaVersion := "3.10.0"
 ThisBuild / organization := "io.github.retronym"
 ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
 
+// the site's front page is the README, copied into a generated site root for scaladoc
+lazy val siteRoot = taskKey[File]("the scaladoc site root, with the README as its index")
+
 lazy val root = project.in(file("."))
   .settings(
     name := "scala-sharing",
@@ -12,4 +15,18 @@ lazy val root = project.in(file("."))
       "org.jetbrains.kotlinx" % "lincheck-jvm" % "2.39" % Test,
     ),
     Test / fork := true,
+    siteRoot := {
+      val dir = target.value / "site-root"
+      val readme = IO.read(baseDirectory.value / "README.md")
+        .replace("Docs and API: <https://retronym.github.io/scala-sharing/docs/index.html>. ", "Source: <https://github.com/retronym/scala-sharing>. ")
+      IO.write(dir / "_docs" / "index.md", readme.linesIterator.dropWhile(_.startsWith("# ")).mkString("\n"))
+      dir
+    },
+    Compile / doc / scalacOptions ++= Seq("-siteroot", siteRoot.value.getPath),
+    Compile / doc / scalacOptions ++= Seq(
+      "-project", "scala-sharing",
+      "-project-version", "snapshot",
+      "-source-links:github://retronym/scala-sharing/main",
+      "-social-links:github::https://github.com/retronym/scala-sharing",
+    ),
   )

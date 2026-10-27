@@ -5,7 +5,7 @@ import scala.compiletime.testing.typeCheckErrors
 import org.junit.Assert.*
 import org.junit.Test
 
-/** `Published` fields: each operation on an `Int`, a value class over an `Int` with a private field (as `Period`)
+/** `Published` fields: each operation on an `Int`, a value class over an `Int` with a private field
  *  and a reference; a plain access does not type-check; and a reader that acquires the flag a writer released sees
  *  what the writer stored before it, on real threads.
  */
@@ -126,3 +126,9 @@ object PublishedTest:
   given Published.Handle[Cell, "flag"] = flagHandle
   given codeGiven: Published.Handle[Cell, "code"] = codeHandle
   given nameGiven: Published.Handle[Cell, "name"] = nameHandle
+
+class PublishedPrivateFieldTest:
+  @Test def privateFieldIsRejected(): Unit =
+    val errs = scala.compiletime.testing.typeCheckErrors(
+      "{ class P { private var f: Published[Int] = Published(0) }; Published.handle[P, \"f\"] }")
+    assertTrue(errs.map(_.message).mkString, errs.exists(_.message.contains("is private")))
