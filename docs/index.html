@@ -27,6 +27,7 @@
   <div class="buttons"></div>
  </div>
  <p>The lock discipline is the field's type, not the class's: a plain read or store of <code>myInfo</code> does not compile, and the library makes the only store, inside the claim on the owner, after <code>compute</code> returns. In <code>Mode.Concurrent</code> the store is a release and the read an acquire, so the value is seen whole however it was built; in <code>Mode.Batch</code> both are plain, and a hit is the field read and a null test. <code>compute</code> is given <code>Sharing.Holds[this.type]</code>, the evidence for the owner's other writer state. <code>Sharing.BlackHole</code> adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses <code>Sharing.once</code> or <code>Sharing.claim</code>, with the store written by the owner behind a method that takes <code>Holds</code>.</p>
+ <p>Compared with a Scala 3 <code>lazy val</code>, which is also computed once, thread-safely, and left computable if its initialiser throws: a <code>lazy val</code> pays for thread safety in every instance (or never, with <code>@threadUnsafe</code>), where <code>Once</code> follows the owner's <code>Mode</code>, plain in batch. Its waiters block on the initialising thread with no wait-for graph, so two initialisers that need each other's values on two threads deadlock, where <code>Once</code> waits through the <code>ClaimRegistry</code>, which detects the cycle, aborts a victim and reports what each holder was doing. It cannot be reset, where <code>Once</code> has <code>reset()</code> for invalidation, under the claim. And its initialiser is given no evidence, where <code>compute</code> is given <code>Holds[this.type]</code> for the owner's other writer state. The <code>lazy val</code> costs no boilerplate and can hold <code>null</code>; <code>Once</code> needs a handle and a <code>ClaimKind</code> beside the class, and uses <code>null</code> for "not yet".</p>
 </section>
 <section id="state-behind-a-monitor">
  <h3 class="h400"><a href="#state-behind-a-monitor" class="anchor"></a>State behind a monitor</h3>
@@ -39,6 +40,15 @@
   <div class="buttons"></div>
  </div>
  <p><code>byName()</code> outside <code>locked</code> does not compile. <code>Guarded</code> is an opaque type over the value itself, so the field costs what it did.</p>
+ <p>The lock is the guard object's own monitor: <code>locked(op)</code> is <code>registry.synchronized(op)</code> in <code>Mode.Concurrent</code> and <code>op</code> in <code>Mode.Batch</code>, and <code>alwaysLocked</code> takes it in every mode. <code>Sharing.serialised(obj)</code> and <code>Sharing.locking(obj)</code> do the same on another object's monitor, for state that cannot move into a <code>Guard</code>. The monitor is reentrant, so a <code>locked</code> block may call another method of the same guard.</p>
+ <p>The evidence proves the monitor is held when the state is touched; it does not prevent deadlock, which is the caller's to avoid:</p>
+ <ul>
+  <li><strong>Keep a locked block a leaf.</strong> Do not call out of it into code that may take another lock: a callback, a listener, another guard's <code>locked</code>, blocking I/O. Two threads that each hold one monitor and want the other's deadlock, and nothing here sees it.</li>
+  <li><strong>Never take a claim, or compute a <code>Once</code>, inside a locked block.</strong> A claim may wait for another thread's computation, which may need this monitor. Monitor waits are not in the wait-for graph, so <code>PerKeyClaims</code> cannot detect that cycle and abort a victim. The reverse is fine: a short locked block inside a claim.</li>
+  <li><strong>If monitors must nest, take them in one global order.</strong></li>
+  <li><strong>Do not let the guarded value escape.</strong> <code>locked(byName())</code> returns the mutable map itself, and the type allows it; return a copy or an immutable view, as <code>names</code> does with <code>toList</code>.</li>
+  <li><strong>The monitor is public.</strong> Code outside that synchronises on the guard object takes the same lock, so keep the guard private, or treat the object as the lock and nothing else.</li>
+ </ul>
 </section>
 <section id="releaseacquire-publishing-checked-at-compile-time">
  <h3 class="h400"><a href="#releaseacquire-publishing-checked-at-compile-time" class="anchor"></a>Release/acquire publishing, checked at compile time</h3>
