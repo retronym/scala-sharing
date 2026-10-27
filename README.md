@@ -17,21 +17,18 @@ Two ideas run through it:
 import io.github.retronym.sharing.*
 
 class Symbol(name: String)(using Mode, ClaimRegistry):
-  private var myInfo: Info | Null = null
-  // the writer's state: reachable only with the claim's evidence
-  private def store(i: Info)(using Sharing.Holds[this.type]): Unit = myInfo = i
+  private[mypkg] var myInfo: Once[this.type, Info] = Once.empty
 
-  def info: Info =
-    Sharing.once(this)(myInfo):   // peek; on a miss, claim `this` and peek again
-      val i = computeInfo()
-      store(i)
-      i
+  // read; on a miss, claim `this`, read again, compute and store
+  def info: Info = myInfo.get(computeInfo())
 
 object Symbol:
   given Sharing.ClaimKind[Symbol] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)
+  val myInfoHandle: Published.Handle[Symbol, "myInfo"] = Published.handle
+  given Published.Handle[Symbol, "myInfo"] = myInfoHandle
 ```
 
-`store(i)` outside `once` or `claim` does not compile: "this code must run as the one writer of (Symbol.this : Symbol)". A hit is the field read and a null test, in every mode. `Sharing.BlackHole` adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable.
+The lock discipline is the field's type, not the class's: a plain read or store of `myInfo` does not compile, and the library makes the only store, inside the claim on the owner, after `compute` returns. In `Mode.Concurrent` the store is a release and the read an acquire, so the value is seen whole however it was built; in `Mode.Batch` both are plain, and a hit is the field read and a null test. `compute` is given `Sharing.Holds[this.type]`, the evidence for the owner's other writer state. `Sharing.BlackHole` adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses `Sharing.once` or `Sharing.claim`, with the store written by the owner behind a method that takes `Holds`.
 
 ### State behind a monitor
 
@@ -89,21 +86,22 @@ given ClaimRegistry = concurrency.newRegistry(() => claimantOfThisThread())
 ## Contents
 
 - `Sharing`: `once`, `claim`, `claimAt`, `Holds`, `unguarded`; `Guard`, `Guarded`, `GuardedVar`, `serialised`, `locking`, `Monitor`, `unlocked`; `ClaimKind`; `BlackHole`.
+- `Once`: a lazy fact in one field, stored only by the library.
 - `Published`, `Payload`: release/acquire fields. `Publish`: release/acquire array slots.
 - `Stamped`, `Stamp`.
 - `ClaimRegistry`, `CoarseLock`, `PerKeyClaims`, `Claimant`, `CycleHandler`, `Cancelled`, `What`, `Label`.
 - `Mode`, `Concurrency`, `benignRace`.
 
-The tests are Lincheck model-checking and stress suites, one section per promise, including a toy compiler symbol table and a wait-for cycle, and compile-time checks that misuse of `Published` is rejected.
+The tests are Lincheck model-checking and stress suites, one section per promise, including a toy compiler symbol table and a wait-for cycle, and compile-time checks that misuse of `Published` and `Once` is rejected.
 
 ## Related work
 
 The evidence types are capabilities in phantom types. That idea has relatives in several languages.
 
 - **Clang Thread Safety Analysis.** `GUARDED_BY(mu)` on data, `REQUIRES(mu)` on functions, `ACQUIRE`/`RELEASE` on lock operations, and `NO_THREAD_SAFETY_ANALYSIS` to opt out. `Holds`/`Monitor` play the part of `REQUIRES` and `unguarded`/`unlocked` the part of the opt-out, scoped to one access with a reason. Clang checks annotations in a separate analysis; here the type checker does it, because the capability is a parameter.
-- **Rust.** `Mutex<T>` puts the data inside the lock so it is reachable only through a `MutexGuard`; `Guard`/`Guarded` is that shape. `Send` and `Sync` are marker traits for what may cross or be shared between threads. `OnceLock`/`LazyLock` are the single-writer lazy value of `once`. GhostCell and the `qcell` crate separate permission from data with a branded token (a lifetime or marker type), as `Holds[key.type]` brands evidence with a singleton type. Salsa (behind rust-analyzer) stamps derived values with a revision and detects query cycles, as `Stamped` and `BlackHole` do.
+- **Rust.** `Mutex<T>` puts the data inside the lock so it is reachable only through a `MutexGuard`; `Guard`/`Guarded` is that shape. `Send` and `Sync` are marker traits for what may cross or be shared between threads. `OnceLock`/`LazyLock` are the single-writer lazy value of `once`; `Once` is `OnceLock` without the box, the field itself made opaque. GhostCell and the `qcell` crate separate permission from data with a branded token (a lifetime or marker type), as `Holds[key.type]` brands evidence with a singleton type. Salsa (behind rust-analyzer) stamps derived values with a revision and detects query cycles, as `Stamped` and `BlackHole` do.
 - **Haskell.** The `ST` monad's rank-2 phantom `s` keeps an `STRef` from escaping its computation, as a singleton-typed `Holds` keeps evidence for one key from serving another. Kiselyov and Shan's *Lightweight Static Capabilities* and Noonan's *Ghosts of Departed Proofs* use phantom-typed names and proofs to carry facts the type checker enforces, which is the role of `Holds`, `Monitor` and `Published.Acquired`. `MVar` and STM's `TVar` are runtime alternatives.
-- **Java.** Error Prone's `@GuardedBy` and `@LazyInit` (the source of `benignRace`), and the Checker Framework's Lock Checker. `VarHandle` access modes are what `Published` and `Publish` compile to.
+- **Java.** Error Prone's `@GuardedBy` and `@LazyInit` (the source of `benignRace`), and the Checker Framework's Lock Checker. `VarHandle` access modes are what `Published`, `Once` and `Publish` compile to.
 - **Scala.** Capture checking (`-language:experimental.captureChecking`) tracks capabilities in types too, at the level of references rather than one parameter per operation.
 
 ## Build

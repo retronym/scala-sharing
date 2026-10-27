@@ -178,7 +178,7 @@ private[sharing] object PublishedMacros:
   import Published.Handle
 
   /** A `Published` field reference: the tree, its owner (the handle's receiver) and the given handle. */
-  private class FieldRef[T](field: Expr[Any])(using val q: Quotes, t: Type[T]):
+  private[sharing] class FieldRef[T](field: Expr[Any])(using val q: Quotes, t: Type[T]):
     import q.reflect.*
 
     // the field as written: the inliner wraps it in a binding-free `Inlined`, and, the extension being in the opaque
@@ -276,9 +276,11 @@ private[sharing] object PublishedMacros:
     if fld.flags.is(Flags.Private) then
       report.errorAndAbort(s"${cls.name}.$name is private, and a private field reached only through its handle is dropped: make it private[${cls.owner.name}]")
     val tpe = TypeRepr.of[O].memberType(fld)
+    def ours(p: TypeRepr) = p.typeSymbol.owner.fullName.startsWith("io.github.retronym.sharing")
     val content = tpe match
-      case AppliedType(p, List(t)) if p.typeSymbol.name == "Published" && p.typeSymbol.owner.fullName.startsWith("io.github.retronym.sharing") => t
-      case _ => report.errorAndAbort(s"${cls.name}.$name is a ${tpe.show}, not a `Published`")
+      case AppliedType(p, List(t)) if p.typeSymbol.name == "Published" && ours(p) => t
+      case AppliedType(p, List(_, t)) if p.typeSymbol.name == "Once" && ours(p) => t
+      case _ => report.errorAndAbort(s"${cls.name}.$name is a ${tpe.show}, not a `Published` or a `Once`")
     // the erased class of the field: a value class's one field, else the content's own class
     val contentCls = content.typeSymbol
     val erasedCls =
@@ -298,7 +300,7 @@ private[sharing] object PublishedMacros:
 
   // an opaque type of this package by its symbol, as a member of the term that owns it: from inside its scope
   // `TypeRepr.of` would see through it
-  private def opaqueTycon(using q: Quotes)(module: String, name: String): q.reflect.TypeRepr =
+  private[sharing] def opaqueTycon(using q: Quotes)(module: String, name: String): q.reflect.TypeRepr =
     import q.reflect.*
     val m = Symbol.requiredModule(module)
     m.termRef.select(m.moduleClass.typeMember(name))

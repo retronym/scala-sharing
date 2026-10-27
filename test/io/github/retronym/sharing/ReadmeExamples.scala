@@ -46,18 +46,15 @@ object ReadmeExamples:
   def computeInfo(): Info = { computed += 1; Info() }
 
   class Symbol(name: String)(using Mode, ClaimRegistry):
-    private var myInfo: Info | Null = null
-    // the writer's state: reachable only with the claim's evidence
-    private def store(i: Info)(using Sharing.Holds[this.type]): Unit = myInfo = i
+    private[sharing] var myInfo: Once[this.type, Info] = Once.empty
 
-    def info: Info =
-      Sharing.once(this)(myInfo):   // peek; on a miss, claim `this` and peek again
-        val i = computeInfo()
-        store(i)
-        i
+    // read; on a miss, claim `this`, read again, compute and store
+    def info: Info = myInfo.get(computeInfo())
 
   object Symbol:
     given Sharing.ClaimKind[Symbol] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)
+    val myInfoHandle: Published.Handle[Symbol, "myInfo"] = Published.handle
+    given Published.Handle[Symbol, "myInfo"] = myInfoHandle
 
   object registry extends Sharing.Guard:
     private val byName = guarded(mutable.HashMap.empty[String, Entry])

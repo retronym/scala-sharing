@@ -15,8 +15,9 @@ import scala.annotation.implicitNotFound
  *
  *  ### Which operation, by what the state is
  *
- *    - **A lazy fact, computed once by one writer while other threads wait for it**: [[once]] (a value read without a
- *      lock once it is there) or [[claim]] (anything else). A [[ClaimKind]] is given beside the key's class and, for
+ *    - **A lazy fact, computed once by one writer while other threads wait for it**: a [[Once]] field (one reference,
+ *      keyed by its owner, stored only by the library), [[once]] (a value read without a lock once it is there, keyed
+ *      by any object) or [[claim]] (anything else). A [[ClaimKind]] is given beside the key's class and, for
  *      re-entry, a [[BlackHole]]. The writer's state is reached through methods that take the claim's evidence,
  *      `Holds[key.type]`.
  *    - **A short critical section over a collection or a few fields**: a [[Guard]] whose fields are [[Guarded]], or
