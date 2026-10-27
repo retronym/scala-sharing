@@ -3,7 +3,7 @@
 <p>Two ideas run through it:</p>
 <ul>
  <li><strong>Batch mode costs nothing.</strong> The owner of the state picks a <code>Mode</code> once. In <code>Mode.Batch</code> every operation is the plain code it wraps: an <code>inline def</code> that compiles to a test of a final field and the original expression, with no lock and no allocation. Code written against the library runs single-threaded at its old speed.</li>
- <li><strong>Guarded state is reachable only with evidence.</strong> A claim or a monitor hands its code a phantom-typed evidence parameter (<code>Holds[key.type]</code>, <code>Monitor[lock.type]</code>), and the guarded state is reachable only through methods that take one. Touching it outside the claim or lock is a compile error, not a race. At run time the evidence is one shared object.</li>
+ <li><strong>Guarded state is reachable only with evidence.</strong> A claim (a reentrant lock per key, whose waits feed a wait-for graph for deadlock detection) or a monitor hands its code a phantom-typed evidence parameter (<code>Holds[key.type]</code>, <code>Monitor[lock.type]</code>), and the guarded state is reachable only through methods that take one. Touching it outside the claim or lock is a compile error, not a race. At run time the evidence is one shared object.</li>
 </ul>
 <section id="highlights">
  <h2 class="h500"><a href="#highlights" class="anchor"></a>Highlights</h2>
@@ -14,22 +14,19 @@
   <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>import io.github.retronym.sharing.*
 </span><span line-number="2" class=""><span class="tooltip-container"></span>
 </span><span line-number="3" class=""><span class="tooltip-container"></span>class Symbol(name: String)(using Mode, ClaimRegistry):
-</span><span line-number="4" class=""><span class="tooltip-container"></span>  private var myInfo: Info | Null = null
-</span><span line-number="5" class=""><span class="tooltip-container"></span>  // the writer's state: reachable only with the claim's evidence
-</span><span line-number="6" class=""><span class="tooltip-container"></span>  private def store(i: Info)(using Sharing.Holds[this.type]): Unit = myInfo = i
-</span><span line-number="7" class=""><span class="tooltip-container"></span>
-</span><span line-number="8" class=""><span class="tooltip-container"></span>  def info: Info =
-</span><span line-number="9" class=""><span class="tooltip-container"></span>    Sharing.once(this)(myInfo):   // peek; on a miss, claim `this` and peek again
-</span><span line-number="10" class=""><span class="tooltip-container"></span>      val i = computeInfo()
-</span><span line-number="11" class=""><span class="tooltip-container"></span>      store(i)
-</span><span line-number="12" class=""><span class="tooltip-container"></span>      i
-</span><span line-number="13" class=""><span class="tooltip-container"></span>
-</span><span line-number="14" class=""><span class="tooltip-container"></span>object Symbol:
-</span><span line-number="15" class=""><span class="tooltip-container"></span>  given Sharing.ClaimKind[Symbol] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>  private[mypkg] var myInfo: Once[this.type, Info] = Once.empty
+</span><span line-number="5" class=""><span class="tooltip-container"></span>
+</span><span line-number="6" class=""><span class="tooltip-container"></span>  // read; on a miss, claim `this`, read again, compute and store
+</span><span line-number="7" class=""><span class="tooltip-container"></span>  def info: Info = myInfo.get(computeInfo())
+</span><span line-number="8" class=""><span class="tooltip-container"></span>
+</span><span line-number="9" class=""><span class="tooltip-container"></span>object Symbol:
+</span><span line-number="10" class=""><span class="tooltip-container"></span>  given Sharing.ClaimKind[Symbol] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)
+</span><span line-number="11" class=""><span class="tooltip-container"></span>  val myInfoHandle: Published.Handle[Symbol, "myInfo"] = Published.handle
+</span><span line-number="12" class=""><span class="tooltip-container"></span>  given Published.Handle[Symbol, "myInfo"] = myInfoHandle
 </span></code></pre>
   <div class="buttons"></div>
  </div>
- <p><code>store(i)</code> outside <code>once</code> or <code>claim</code> does not compile: "this code must run as the one writer of (Symbol.this : Symbol)". A hit is the field read and a null test, in every mode. <code>Sharing.BlackHole</code> adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable.</p>
+ <p>The lock discipline is the field's type, not the class's: a plain read or store of <code>myInfo</code> does not compile, and the library makes the only store, inside the claim on the owner, after <code>compute</code> returns. In <code>Mode.Concurrent</code> the store is a release and the read an acquire, so the value is seen whole however it was built; in <code>Mode.Batch</code> both are plain, and a hit is the field read and a null test. <code>compute</code> is given <code>Sharing.Holds[this.type]</code>, the evidence for the owner's other writer state. <code>Sharing.BlackHole</code> adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses <code>Sharing.once</code> or <code>Sharing.claim</code>, with the store written by the owner behind a method that takes <code>Holds</code>.</p>
 </section>
 <section id="state-behind-a-monitor">
  <h3 class="h400"><a href="#state-behind-a-monitor" class="anchor"></a>State behind a monitor</h3>
@@ -86,27 +83,28 @@
 </span></code></pre>
   <div class="buttons"></div>
  </div>
- <p><code>CoarseLock</code> serialises the threads under one reentrant lock and records what its holder is doing for lock-wait reports. <code>PerKeyClaims</code> gives each key its own claim, detects wait-for cycles between claimants, and has one party back off (<code>Cancelled</code>) or report the cycle.</p>
+ <p><code>CoarseLock</code> serialises the threads under one reentrant lock and records what its holder is doing for lock-wait reports. <code>PerKeyClaims</code> gives each key its own claim, detects wait-for cycles between claimants, and aborts one party as the deadlock victim (<code>Cancelled</code>, and its work retried) or has one report the cycle.</p>
 </section>
 <section id="contents">
  <h2 class="h500"><a href="#contents" class="anchor"></a>Contents</h2>
  <ul>
   <li><code>Sharing</code>: <code>once</code>, <code>claim</code>, <code>claimAt</code>, <code>Holds</code>, <code>unguarded</code>; <code>Guard</code>, <code>Guarded</code>, <code>GuardedVar</code>, <code>serialised</code>, <code>locking</code>, <code>Monitor</code>, <code>unlocked</code>; <code>ClaimKind</code>; <code>BlackHole</code>.</li>
+  <li><code>Once</code>: a lazy fact in one field, stored only by the library.</li>
   <li><code>Published</code>, <code>Payload</code>: release/acquire fields. <code>Publish</code>: release/acquire array slots.</li>
   <li><code>Stamped</code>, <code>Stamp</code>.</li>
   <li><code>ClaimRegistry</code>, <code>CoarseLock</code>, <code>PerKeyClaims</code>, <code>Claimant</code>, <code>CycleHandler</code>, <code>Cancelled</code>, <code>What</code>, <code>Label</code>.</li>
   <li><code>Mode</code>, <code>Concurrency</code>, <code>benignRace</code>.</li>
  </ul>
- <p>The tests are Lincheck model-checking and stress suites, one section per promise, including a toy compiler symbol table and a wait-for cycle, and compile-time checks that misuse of <code>Published</code> is rejected.</p>
+ <p>The tests are Lincheck model-checking and stress suites, one section per promise, including a toy compiler symbol table and a wait-for cycle, and compile-time checks that misuse of <code>Published</code> and <code>Once</code> is rejected.</p>
 </section>
 <section id="related-work">
  <h2 class="h500"><a href="#related-work" class="anchor"></a>Related work</h2>
  <p>The evidence types are capabilities in phantom types. That idea has relatives in several languages.</p>
  <ul>
   <li><strong>Clang Thread Safety Analysis.</strong> <code>GUARDED_BY(mu)</code> on data, <code>REQUIRES(mu)</code> on functions, <code>ACQUIRE</code>/<code>RELEASE</code> on lock operations, and <code>NO_THREAD_SAFETY_ANALYSIS</code> to opt out. <code>Holds</code>/<code>Monitor</code> play the part of <code>REQUIRES</code> and <code>unguarded</code>/<code>unlocked</code> the part of the opt-out, scoped to one access with a reason. Clang checks annotations in a separate analysis; here the type checker does it, because the capability is a parameter.</li>
-  <li><strong>Rust.</strong> <code>Mutex&lt;T&gt;</code> puts the data inside the lock so it is reachable only through a <code>MutexGuard</code>; <code>Guard</code>/<code>Guarded</code> is that shape. <code>Send</code> and <code>Sync</code> are marker traits for what may cross or be shared between threads. <code>OnceLock</code>/<code>LazyLock</code> are the single-writer lazy value of <code>once</code>. GhostCell and the <code>qcell</code> crate separate permission from data with a branded token (a lifetime or marker type), as <code>Holds[key.type]</code> brands evidence with a singleton type. Salsa (behind rust-analyzer) stamps derived values with a revision and detects query cycles, as <code>Stamped</code> and <code>BlackHole</code> do.</li>
+  <li><strong>Rust.</strong> <code>Mutex&lt;T&gt;</code> puts the data inside the lock so it is reachable only through a <code>MutexGuard</code>; <code>Guard</code>/<code>Guarded</code> is that shape. <code>Send</code> and <code>Sync</code> are marker traits for what may cross or be shared between threads. <code>OnceLock</code>/<code>LazyLock</code> are the single-writer lazy value of <code>once</code>; <code>Once</code> is <code>OnceLock</code> without the box, the field itself made opaque. GhostCell and the <code>qcell</code> crate separate permission from data with a branded token (a lifetime or marker type), as <code>Holds[key.type]</code> brands evidence with a singleton type. Salsa (behind rust-analyzer) stamps derived values with a revision and detects query cycles, as <code>Stamped</code> and <code>BlackHole</code> do.</li>
   <li><strong>Haskell.</strong> The <code>ST</code> monad's rank-2 phantom <code>s</code> keeps an <code>STRef</code> from escaping its computation, as a singleton-typed <code>Holds</code> keeps evidence for one key from serving another. Kiselyov and Shan's <em>Lightweight Static Capabilities</em> and Noonan's <em>Ghosts of Departed Proofs</em> use phantom-typed names and proofs to carry facts the type checker enforces, which is the role of <code>Holds</code>, <code>Monitor</code> and <code>Published.Acquired</code>. <code>MVar</code> and STM's <code>TVar</code> are runtime alternatives.</li>
-  <li><strong>Java.</strong> Error Prone's <code>@GuardedBy</code> and <code>@LazyInit</code> (the source of <code>benignRace</code>), and the Checker Framework's Lock Checker. <code>VarHandle</code> access modes are what <code>Published</code> and <code>Publish</code> compile to.</li>
+  <li><strong>Java.</strong> Error Prone's <code>@GuardedBy</code> and <code>@LazyInit</code> (the source of <code>benignRace</code>), and the Checker Framework's Lock Checker. <code>VarHandle</code> access modes are what <code>Published</code>, <code>Once</code> and <code>Publish</code> compile to.</li>
   <li><strong>Scala.</strong> Capture checking (<code>-language:experimental.captureChecking</code>) tracks capabilities in types too, at the level of references rather than one parameter per operation.</li>
  </ul>
 </section>

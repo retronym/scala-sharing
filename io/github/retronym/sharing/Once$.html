@@ -1,0 +1,488 @@
+<!DOCTYPE html><html data-pathToRoot="../../../../" data-rawLocation="io/github/retronym/sharing/Once$" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>Once</title><link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico"></link><script type="text/javascript" src="../../../../scripts/theme.js"></script><script type="text/javascript" src="../../../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../../../styles/searchbar.css"></link><link rel="stylesheet" href="../../../../styles/social-links.css"></link><link rel="stylesheet" href="../../../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../../../styles/content-contributors.css"></link><script type="text/javascript" src="../../../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/data.js" defer="true"></script><script>var pathToRoot = "../../../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../../../" class="logo-container"><span class="project-name h300">scala-sharing</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a><div class="projectVersion">snapshot</div></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">scala-sharing</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="docs-nav-button" class="switcher h100 " href="../../../../docs/index.html">Docs</a><a id="api-nav-button" class="switcher h100 selected" href="../../../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../sharing.html"><span class="micon pa"></span><span>io.github.retronym.sharing</span></a></span><div class="ni n1 "><span class="nh "><a href="AbortVictim$.html"><span class="micon ob"></span><span>AbortVictim</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Cancelled.html"><span class="micon cl"></span><span>Cancelled</span></a></span></div><div class="ni n1 "><span class="nh "><a href="ClaimRegistry.html"><span class="micon tr"></span><span>ClaimRegistry</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Claimant.html"><span class="micon cl"></span><span>Claimant</span></a></span></div><div class="ni n1 "><span class="nh "><a href="CoarseLock.html"><span class="micon cl"></span><span>CoarseLock</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Concurrency.html"><span class="micon cl"></span><span>Concurrency</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Concurrency$.html"><span class="micon ob"></span><span>Concurrency</span></a></span></div><div class="ni n1 "><span class="nh "><a href="CycleHandler.html"><span class="micon tr"></span><span>CycleHandler</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Guarded$.html"><span class="micon ob"></span><span>Guarded</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Label.html"><span class="micon cl"></span><span>Label</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Mode$.html"><span class="micon ob"></span><span>Mode</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Mode.html"><span class="micon cl"></span><span>Mode</span></a></span></div><div class="ni n1 expanded"><span class="nh h100 selected"><a href="#"><span class="micon ob"></span><span>Once</span></a></span></div><div class="ni n1 "><span class="nh "><a href="OnceOps.html"><span class="micon tr"></span><span>OnceOps</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Payload$.html"><span class="micon ob"></span><span>Payload</span></a></span></div><div class="ni n1 "><span class="nh "><a href="PayloadOps.html"><span class="micon tr"></span><span>PayloadOps</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="PerKeyClaims$.html"><span class="micon ob"></span><span>PerKeyClaims</span></a></span><div class="ni n2 "><span class="nh "><a href="PerKeyClaims$$Claim.html"><span class="micon cl"></span><span>Claim</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="PerKeyClaims.html"><span class="micon cl"></span><span>PerKeyClaims</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="Published$.html"><span class="micon ob"></span><span>Published</span></a></span><div class="ni n2 "><span class="nh "><a href="Published$$Handle$.html"><span class="micon ob"></span><span>Handle</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="PublishedOps.html"><span class="micon tr"></span><span>PublishedOps</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="Sharing$.html"><span class="micon ob"></span><span>Sharing</span></a></span><div class="ni n2 "><span class="nh "><a href="Sharing$$BlackHole.html"><span class="micon tr"></span><span>BlackHole</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$ClaimKind.html"><span class="micon cl"></span><span>ClaimKind</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Guard.html"><span class="micon cl"></span><span>Guard</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$GuardedVar.html"><span class="micon cl"></span><span>GuardedVar</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Holds.html"><span class="micon cl"></span><span>Holds</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Monitor.html"><span class="micon cl"></span><span>Monitor</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="Stamp.html"><span class="micon cl"></span><span>Stamp</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Stamped.html"><span class="micon cl"></span><span>Stamped</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Stamped$.html"><span class="micon ob"></span><span>Stamped</span></a></span></div><div class="ni n1 "><span class="nh "><a href="What.html"><span class="micon cl"></span><span>What</span></a></span></div><div class="ni n1 "><span class="nh "><a href="benignRace.html"><span class="micon cl"></span><span>benignRace</span></a></span></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../../../index.html">scala-sharing</a>/<a href="../sharing.html">io.github.retronym.sharing</a>/<a href="Once$.html">Once</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon ob"></span></span>
+ <h1 class="h600 single">Once</h1>
+</div>
+<div class="fqname body-large">
+ <span>io.github.retronym.sharing.Once$package.Once</span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">object </span></span><a href="Once$.html" t="n" class="documentableName ">Once</a><span t="k"> extends </span><a href="OnceOps.html" t="t">OnceOps</a></span><span class="signature-long"></span>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc"></div>
+ <section id="attributes">
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">Source</dt>
+   <dd class="body-medium">
+    <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L40" target="_blank">Once.scala</a>
+   </dd>
+   <dt class="body-small">Graph</dt>
+   <dd class="body-medium">
+    <div id="inheritance-diagram" class="diagram-class showGraph">
+     <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
+     <svg id="graph"></svg>
+     <script type="text/dot" id="dot"> digraph g {
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">object <a href=\"Once$.html\" t=\"n\">Once</a></span>", class="object vertex"];
+node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
+node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
+node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"OnceOps.html\" t=\"n\">OnceOps</a></span>", class="trait vertex"];
+
+
+ node0 -> node1;
+node1 -> node2;
+node1 -> node3;
+node3 -> node2;
+node0 -> node4;
+node4 -> node1;
+
+}
+</script>
+    </div>
+   </dd>
+   <dt class="body-small">Supertypes</dt>
+   <dd class="body-medium">
+    <div class="mono-small-block supertypes">
+     <div>
+      trait <a href="OnceOps.html" t="n">OnceOps</a>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Object</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Matchable</span>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Any</span>
+     </div>
+     <span></span>
+    </div>
+   </dd>
+   <dt class="body-small">Self type</dt>
+   <dd class="body-medium">
+    <div class="mono-small-block supertypes">
+     <span></span>
+     <div>
+      <a href="Once$.html" t="n">Once</a>.<span t="k">type</span>
+     </div>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div>
+  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Value-members">
+     <div data-togglable="Value members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Value members" class="h400">Value members</h3>
+      </div>
+      <section id="Concrete-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Concrete methods</h4>
+        </div>
+        <div class="documentableElement" id="empty-5c5" data-f-keywords="inline">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#empty-5c5" t="n" class="documentableName ">empty</a>[<span t="k"></span><span data-unresolved-link="" t="t">K</span>, <span t="k"></span><span data-unresolved-link="" t="t">T</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">AnyRef</span>]: <a href="../sharing.html#Once-0" t="t">Once</a>[<span data-unresolved-link="" t="t">K</span>, <span data-unresolved-link="" t="t">T</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>The field's initial value: no fact yet.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>The field's initial value: no fact yet.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L42" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+      <section id="Inherited-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Inherited methods</h4>
+        </div>
+        <div class="documentableElement" id="acquireRaw-957" data-f-keywords="inline" data-f-inherited="OnceOps">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#acquireRaw-957" t="n" class="documentableName ">acquireRaw</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <span data-unresolved-link="" t="t">Any</span>): <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <a href="OnceOps.html#acquireRaw-957">OnceOps</a>
+              </dd>
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L96" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="owner-957" data-f-keywords="inline" data-f-inherited="OnceOps">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#owner-957" t="n" class="documentableName ">owner</a>[<span t="k"></span><span data-unresolved-link="" t="t">K</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <span data-unresolved-link="" t="t">Any</span>): <span data-unresolved-link="" t="t">K</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <a href="OnceOps.html#owner-957">OnceOps</a>
+              </dd>
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L95" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="plainRaw-957" data-f-keywords="inline" data-f-inherited="OnceOps">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#plainRaw-957" t="n" class="documentableName ">plainRaw</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <span data-unresolved-link="" t="t">Any</span>): <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <a href="OnceOps.html#plainRaw-957">OnceOps</a>
+              </dd>
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L97" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="releaseRaw-1e3" data-f-keywords="inline" data-f-inherited="OnceOps">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#releaseRaw-1e3" t="n" class="documentableName ">releaseRaw</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <span data-unresolved-link="" t="t">Any</span>, <span t="k">inline </span><span data-unresolved-link="" t="n">v</span>: <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <a href="OnceOps.html#releaseRaw-1e3">OnceOps</a>
+              </dd>
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L98" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="setPlainRaw-a4" data-f-keywords="inline" data-f-inherited="OnceOps">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#setPlainRaw-a4" t="n" class="documentableName ">setPlainRaw</a>[<span t="k"></span><span data-unresolved-link="" t="t">K</span>, <span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <span data-unresolved-link="" t="t">Any</span>, <span t="k">inline </span><span data-unresolved-link="" t="n">v</span>: <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <a href="OnceOps.html#setPlainRaw-a4">OnceOps</a>
+              </dd>
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L99" target="_blank">Once.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+    <section id="Extensions">
+     <div data-togglable="Extensions" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Extensions" class="h400">Extensions</h3>
+      </div>
+      <section id="Inherited-extensions">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Inherited extensions</h4>
+        </div>
+        <div>
+         <span class="groupHeader"><span t="k">extension </span>[<span t="k"></span><span data-unresolved-link="" t="t">K</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">AnyRef</span><span t="k"> &amp; </span><span data-unresolved-link="" t="t">Singleton</span>, <span t="k"></span><span data-unresolved-link="" t="t">T</span><span t="k"> &lt;: </span><span data-unresolved-link="" t="t">AnyRef</span>](<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">field</span>: <a href="../sharing.html#Once-0" t="t">Once</a>[<span data-unresolved-link="" t="t">K</span>, <span data-unresolved-link="" t="t">T</span>])</span>
+         <div class="documentableElement" id="get-fffff45c" data-f-keywords="inline" data-f-inherited="OnceOps">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#get-fffff45c" t="n" class="documentableName ">get</a>(<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">compute</span>: <a href="Sharing$$Holds.html" t="t">Holds</a>[<span data-unresolved-link="" t="t">K</span>] <span t="k">?=&gt;</span> <span data-unresolved-link="" t="t">T</span>)(<span t="k">using </span><span t="k">inline </span><span data-unresolved-link="" t="n">kind</span>: <a href="Sharing$$ClaimKind.html" t="t">ClaimKind</a>[<span data-unresolved-link="" t="t">K</span>])(<span t="k">using </span><span t="k">inline </span><span data-unresolved-link="" t="n">mode</span>: <a href="Mode.html" t="t">Mode</a>, <span t="k">inline </span><span data-unresolved-link="" t="n">registry</span>: <a href="ClaimRegistry.html" t="t">ClaimRegistry</a>): <span data-unresolved-link="" t="t">T</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>The fact, or, when there is none, the value of <code>compute</code>, run as the one writer of the field's owner (see <a href="Sharing$.html#claim-fffff729">Sharing.claim</a>) and stored. The field is read again inside the claim first, since another thread may have stored the value meanwhile. Another thread waits for an owner's computation at the claim, so <code>compute</code> is entered again only by its owner, re-entering its own computation: the place for a cycle test.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>The fact, or, when there is none, the value of <code>compute</code>, run as the one writer of the field's owner (see <a href="Sharing$.html#claim-fffff729">Sharing.claim</a>) and stored. The field is read again inside the claim first, since another thread may have stored the value meanwhile. Another thread waits for an owner's computation at the claim, so <code>compute</code> is entered again only by its owner, re-entering its own computation: the place for a cycle test.</p>
+               <p>Expands to</p>
+               <div class="snippet mono-small-block">
+                <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>val v = if mode.concurrent then  else
+</span><span line-number="2" class=""><span class="tooltip-container"></span>if v != null then v
+</span><span line-number="3" class=""><span class="tooltip-container"></span>else Sharing.claim(owner):
+</span><span line-number="4" class=""><span class="tooltip-container"></span>  val v1 =                       // ordered by the claim
+</span><span line-number="5" class=""><span class="tooltip-container"></span>  if v1 != null then v1
+</span><span line-number="6" class=""><span class="tooltip-container"></span>  else { val r = compute; if mode.concurrent then  else ; r }
+</span></code></pre>
+                <div class="buttons"></div>
+               </div>
+              </div>
+              <h2 class="h200">Value parameters</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">compute</dt>
+               <dd class="body-medium">
+                <p>computes the value, as the one writer; the library stores it</p>
+               </dd>
+              </dl>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">Inherited from:</dt>
+               <dd class="body-medium">
+                <a href="OnceOps.html#get-fffff45c">OnceOps</a>
+               </dd>
+               <dt class="body-small">Source</dt>
+               <dd class="body-medium">
+                <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L70" target="_blank">Once.scala</a>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="peek-d4e" data-f-keywords="inline" data-f-inherited="OnceOps">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#peek-d4e" t="n" class="documentableName ">peek</a>(<span t="k">using </span><span t="k">inline </span><span data-unresolved-link="" t="n">mode</span>: <a href="Mode.html" t="t">Mode</a>): <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>The fact if it is there, else <code>null</code>, without claiming: read with acquire semantics in a concurrent mode, so what it refers to is visible.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>The fact if it is there, else <code>null</code>, without claiming: read with acquire semantics in a concurrent mode, so what it refers to is visible.</p>
+              </div>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">Inherited from:</dt>
+               <dd class="body-medium">
+                <a href="OnceOps.html#peek-d4e">OnceOps</a>
+               </dd>
+               <dt class="body-small">Source</dt>
+               <dd class="body-medium">
+                <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L84" target="_blank">Once.scala</a>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="reset-a0a" data-f-keywords="inline" data-f-inherited="OnceOps">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#reset-a0a" t="n" class="documentableName ">reset</a>(<span t="k"></span>)(<span t="k">using </span><span t="k"></span><a href="Sharing$$Holds.html" t="t">Holds</a>[<span data-unresolved-link="" t="t">K</span>])(<span t="k">using </span><span t="k">inline </span><span data-unresolved-link="" t="n">mode</span>: <a href="Mode.html" t="t">Mode</a>): <span data-unresolved-link="" t="t">Unit</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>Forgets the fact, as the one writer, so that the next <code>get</code> computes it again.</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>Forgets the fact, as the one writer, so that the next <code>get</code> computes it again.</p>
+              </div>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">Inherited from:</dt>
+               <dd class="body-medium">
+                <a href="OnceOps.html#reset-a0a">OnceOps</a>
+               </dd>
+               <dt class="body-small">Source</dt>
+               <dd class="body-medium">
+                <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L88" target="_blank">Once.scala</a>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+         <div class="documentableElement" id="setPlain-a4" data-f-keywords="inline" data-f-inherited="OnceOps">
+          <div class="documentableElement-expander">
+           <button class="icon-button ar show-content"></button>
+           <div class="header monospace mono-medium">
+            <div class="signature">
+             <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="Once$.html#setPlain-a4" t="n" class="documentableName ">setPlain</a>(<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">v</span>: <span data-unresolved-link="" t="t">T</span><span t="k"> | </span><span data-unresolved-link="" t="t">Null</span>): <span data-unresolved-link="" t="t">Unit</span>
+            </div>
+           </div>
+          </div>
+          <div class="docs">
+           <span class="modifiers"></span>
+           <div>
+            <div class="originInfo"></div>
+            <div class="memberDocumentation">
+             <div class="documentableBrief doc">
+              <p>A plain store: only where the protocol allows it (before the owner is shared, or one thread).</p>
+             </div>
+             <div class="cover">
+              <div class="doc">
+               <p>A plain store: only where the protocol allows it (before the owner is shared, or one thread).</p>
+              </div>
+              <h2 class="h200">Attributes</h2>
+              <dl class="attributes attributes-small">
+               <dt class="body-small">Inherited from:</dt>
+               <dd class="body-medium">
+                <a href="OnceOps.html#setPlain-a4">OnceOps</a>
+               </dd>
+               <dt class="body-small">Source</dt>
+               <dd class="body-medium">
+                <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/Once.scala#L92" target="_blank">Once.scala</a>
+               </dd>
+              </dl>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Attributes</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li><li><a href="#Extensions">Extensions</a><ul><li><a href="#Inherited-extensions">Inherited extensions</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
