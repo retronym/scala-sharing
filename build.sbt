@@ -23,6 +23,8 @@ lazy val root = project.in(file("."))
       val dir = target.value / "site-root"
       val readme = IO.read(baseDirectory.value / "README.md")
         .replace("Docs and API: <https://retronym.github.io/scala-sharing/docs/index.html>. ", "Source: <https://github.com/retronym/scala-sharing>. ")
+        // the README's links into the API are absolute, for GitHub; on the site, relative to this page (docs/index.html)
+        .replace("https://retronym.github.io/scala-sharing/", "../")
       // the tabs' style, which GitHub would strip from the README, as a block at the top of the page
       val style = IO.read(baseDirectory.value / "site" / "tabs.css")
       val body = readme.linesIterator.dropWhile(_.startsWith("# ")).mkString("\n")
