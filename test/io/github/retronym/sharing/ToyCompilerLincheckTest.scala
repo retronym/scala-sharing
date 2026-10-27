@@ -56,7 +56,7 @@ object ToyCompilerLincheckTest:
     @Operation def infoOfBB(): Int = root.members(1).members(1).info
     @Operation def created(): Int = made.get
 
-    /** A symbol: its members and its info are lazy facts, each published whole (a final-field structure). */
+    /** A symbol: its members and its info are lazy facts, each safely published (a final-field structure). */
     final class Sym(val name: String, depth: Int) extends Lockable:
       made.incrementAndGet()
 

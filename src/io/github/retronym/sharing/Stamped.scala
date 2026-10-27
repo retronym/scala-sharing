@@ -4,6 +4,10 @@ import scala.quoted.*
 
 /** A value with the stamp it was computed at, as one immutable object, held in one `var` of the cache's owner.
  *
+ *  Bloch's racy single-check idiom (Effective Java, Item 83) over an immutable holder (JCIP §3.4.2): a reader that
+ *  misses computes and stores, and two may both compute; the holder's final fields (JLS §17.5) make that safe without
+ *  a volatile.
+ *
  *  A stamp says what the value was computed against: a generation of the inputs, a run, a version. The value is valid
  *  while its stamp is the current one.
  *

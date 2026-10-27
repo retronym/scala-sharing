@@ -22,7 +22,7 @@ final class Concurrency private (val concurrent: Boolean, val parallel: Boolean)
 
   /** The registry for the operations' given: a `CoarseLock` when serialised, `PerKeyClaims` over `currentClaimant`
    *  when parallel; in batch mode one that is never called. */
-  def newRegistry(currentClaimant: () => Claimant, cycles: CycleHandler = BackOff): ClaimRegistry =
+  def newRegistry(currentClaimant: () => Claimant, cycles: CycleHandler = AbortVictim): ClaimRegistry =
     if parallel then PerKeyClaims(currentClaimant, cycles)
     else if concurrent then CoarseLock()
     else Concurrency.NoRegistry

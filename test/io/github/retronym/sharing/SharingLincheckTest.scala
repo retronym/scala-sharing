@@ -91,7 +91,7 @@ object SharingLincheckTest:
     def computations(): Int = if there then 1 else 0
 
   /** The fact is stored when its computation ends and peeked through what was stored, so its field reads 0 if it was
-   *  not published whole. The computation runs in the fact's black hole (`computeInside`): finding it entered is a
+   *  not safely published. The computation runs in the fact's black hole (`computeInside`): finding it entered is a
    *  cycle, which only the holder of the claim, re-entering its own computation, could see, and which is reported as
    *  -2, a result the specification never gives.
    */
@@ -218,7 +218,7 @@ object SharingLincheckTest:
       n += 1
       n - 1
 
-  /** `op`, restarted while it is cancelled (backs off from a wait-for cycle), as a request is. */
+  /** `op`, retried while it is cancelled (aborted as a wait-for cycle's victim), as a request is. */
   @annotation.tailrec
   def restarting[T](op: => T): T =
     val result = try Some(op) catch case _: Cancelled => None

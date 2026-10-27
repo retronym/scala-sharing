@@ -4,8 +4,13 @@ import java.lang.invoke.{MethodHandles, VarHandle}
 import scala.quoted.*
 
 /** A field that publishes others: a writer stores them, then this field with release semantics; a reader loads this
- *  field with acquire semantics, then them, and sees what was stored before it. Message passing through one field,
+ *  field with acquire semantics, then them. The release store pairs with an acquire load that reads its value, so what
+ *  was written before the store is visible after the load: message passing (the MP litmus test) through one field,
  *  without a lock, as Java's `VarHandle.setRelease` and `getAcquire` give, with the field named at compile time.
+ *
+ *  These are release/acquire in the C++11 sense, which the `VarHandle` access modes adopt. JLS §17 gives
+ *  happens-before only to volatiles, monitors and thread start and join; Doug Lea's "Using JDK 9 Memory Order Modes"
+ *  describes these modes.
  *
  *  Opaque, so that a plain read or write of the field does not type-check: the only ways in are `acquire`, `release`
  *  and, where the protocol allows a plain access, `plain` and `setPlain`, named so that they can be found and counted.
@@ -64,8 +69,8 @@ object Published extends PublishedOps:
   /** The value of `S`'s publisher `F` (`S` the owner's singleton type), loaded with acquire semantics: the evidence that
    *  a [[Payload]] of `F` is read after it (`version.acquired`, then `text.after(snap)`).
    *
-   *  It need not be used at once: a read after an acquire stays ordered after it, so evidence that outlives its block is
-   *  still sound.
+   *  It need not be used at once: a read after an acquire in program order still sees what the acquire made visible, so
+   *  evidence that outlives its block is still sound.
    */
   opaque type Acquired[S, F <: String, T] = T
 
@@ -75,7 +80,7 @@ object Published extends PublishedOps:
   opaque type Publishing = AnyRef
 
 /** A field published by its owner's [[Published]] field `F`: stored only in a `publishing` block of `F` (before its
- *  release), read only after an `acquired` of `F` on the same object, or with `peek` where an unordered read is the
+ *  release), read only after an `acquired` of `F` on the same object, or with `plain` where an unordered read is the
  *  protocol (a hint checked again after).
  *
  *  {{{
@@ -117,9 +122,10 @@ trait PayloadOps:
      */
     inline def after[S, V](snap: Acquired[S, F, V]): T = ${ PublishedMacros.afterImpl[S, F, T]('field, 'snap) }
 
-    /** The field, read with no order: only where the protocol allows it (a hint checked again after).
+    /** A plain read, with no order: only where the protocol allows it (a hint checked again after). `plain`, as on
+     *  [[Published]], after the `VarHandle` access mode.
      */
-    inline def peek: T = ${ PublishedMacros.payloadPeekImpl[T]('field) }
+    inline def plain: T = ${ PublishedMacros.payloadPlainImpl[T]('field) }
 
     /** Stores `v` in the field, inside a `publishing` block of its publisher, before the release that ends it.
      */
@@ -332,7 +338,7 @@ private[sharing] object PublishedMacros:
         s"${f.ref.show} is read after the acquire of another object's publisher (${TypeRepr.of[S].show}, not ${f.owner.tpe.show})", snap)
     Select.unique(f.ref, "asInstanceOf").appliedToType(TypeRepr.of[T]).asExprOf[T]
 
-  def payloadPeekImpl[T: Type](field: Expr[Any])(using Quotes): Expr[T] =
+  def payloadPlainImpl[T: Type](field: Expr[Any])(using Quotes): Expr[T] =
     val f = FieldRef[T](field)
     import f.q.reflect.*
     Select.unique(f.ref, "asInstanceOf").appliedToType(TypeRepr.of[T]).asExprOf[T]

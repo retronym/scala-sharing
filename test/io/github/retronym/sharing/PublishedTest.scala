@@ -7,7 +7,7 @@ import org.junit.Test
 
 /** `Published` fields: each operation on an `Int`, a value class over an `Int` with a private field
  *  and a reference; a plain access does not type-check; and a reader that acquires the flag a writer released sees
- *  what the writer stored before it, on real threads.
+ *  what the writer stored before it, on real threads: the message-passing (MP) litmus test.
  */
 class PublishedTest:
   import PublishedTest.*
@@ -42,7 +42,7 @@ class PublishedTest:
     val p = c.flag.acquired
     assertEquals(5, p.value)
     assertEquals(42, c.payload.after(p))
-    assertEquals(42, c.payload.peek)
+    assertEquals(42, c.payload.plain)
 
   @Test def payloadMisuseDoesNotCompile(): Unit =
     // a plain read, a store outside a `publishing` block

@@ -7,7 +7,7 @@ Docs and API: <https://retronym.github.io/scala-sharing/docs/index.html>. Packag
 Two ideas run through it:
 
 - **Batch mode costs nothing.** The owner of the state picks a `Mode` once. In `Mode.Batch` every operation is the plain code it wraps: an `inline def` that compiles to a test of a final field and the original expression, with no lock and no allocation. Code written against the library runs single-threaded at its old speed.
-- **Guarded state is reachable only with evidence.** A claim or a monitor hands its code a phantom-typed evidence parameter (`Holds[key.type]`, `Monitor[lock.type]`), and the guarded state is reachable only through methods that take one. Touching it outside the claim or lock is a compile error, not a race. At run time the evidence is one shared object.
+- **Guarded state is reachable only with evidence.** A claim (a reentrant lock per key, whose waits feed a wait-for graph for deadlock detection) or a monitor hands its code a phantom-typed evidence parameter (`Holds[key.type]`, `Monitor[lock.type]`), and the guarded state is reachable only through methods that take one. Touching it outside the claim or lock is a compile error, not a race. At run time the evidence is one shared object.
 
 ## Highlights
 
@@ -81,7 +81,7 @@ given Mode = concurrency.mode
 given ClaimRegistry = concurrency.newRegistry(() => claimantOfThisThread())
 ```
 
-`CoarseLock` serialises the threads under one reentrant lock and records what its holder is doing for lock-wait reports. `PerKeyClaims` gives each key its own claim, detects wait-for cycles between claimants, and has one party back off (`Cancelled`) or report the cycle.
+`CoarseLock` serialises the threads under one reentrant lock and records what its holder is doing for lock-wait reports. `PerKeyClaims` gives each key its own claim, detects wait-for cycles between claimants, and aborts one party as the deadlock victim (`Cancelled`, and its work retried) or has one report the cycle.
 
 ## Contents
 

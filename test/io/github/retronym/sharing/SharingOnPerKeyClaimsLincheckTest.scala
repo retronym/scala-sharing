@@ -9,7 +9,7 @@ import SharingLincheckTest.*
 import ToyCompilerLincheckTest.{BatchToy, Toy}
 
 /** `SharingLincheckTest`'s sections and `ToyCompilerLincheckTest`'s toy on the registry for parallel threads,
- *  `PerKeyClaims` (one claimant per thread, each able to back off), and one section of its own: a wait-for cycle,
+ *  `PerKeyClaims` (one claimant per thread, each able to abort), and one section of its own: a wait-for cycle,
  *  which only this registry checks for.
  *
  *  Stress only: a wait for a claim is timed, which model checking does not explore. Per section, 10 scenarios of 3
@@ -22,7 +22,7 @@ class SharingOnPerKeyClaimsLincheckTest:
   @Test def claim(): Unit = stress(classOf[ClaimSpec], classOf[RootsClaim])
   @Test def once(): Unit = stress(classOf[OnceSpec], classOf[RootsOnce])
   @Test def blackHole(): Unit = stress(classOf[BlackHoleSpec], classOf[RootsBlackHole])
-  @Test def claimBacksOffAWaitForCycle(): Unit = stress(classOf[CycleSpec], classOf[RootsCycle], scenarios = 5, runs = 50)
+  @Test def claimAbortsAWaitForCycleVictim(): Unit = stress(classOf[CycleSpec], classOf[RootsCycle], scenarios = 5, runs = 50)
   @Test def toyCompiler(): Unit = stress(classOf[BatchToy], classOf[RootsToy])
 
 object SharingOnPerKeyClaimsLincheckTest:
@@ -39,9 +39,9 @@ object SharingOnPerKeyClaimsLincheckTest:
   class RootsBlackHole extends BlackHole(using roots())
   class RootsToy extends Toy(using Mode.Concurrent, roots())
 
-  /** Two claimants that claim two keys in opposite orders can close a wait-for cycle. One of them backs off and its
-   *  call restarts, rather than both waiting for ever, a hang Lincheck reports. A call restarts until it does not back
-   *  off, so what it promises is what a claim that never backs off does: one more on the counter.
+  /** Two claimants that claim two keys in opposite orders can close a wait-for cycle. One of them is aborted as the
+   *  victim and its call retried, rather than both waiting for ever, a hang Lincheck reports. A call is retried until
+   *  it is not aborted, so what it promises is what a claim that is never aborted does: one more on the counter.
    */
   class CycleSpec extends CounterSpec:
     def ab(): Int = next()

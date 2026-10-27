@@ -1,6 +1,7 @@
 package io.github.retronym.sharing
 
-/** Who holds the claims on keys when threads are concurrent.
+/** Who holds the claims on keys when threads are concurrent. A claim is a reentrant lock per key, whose waits feed a
+ *  wait-for graph for deadlock detection ([[PerKeyClaims]]), or the one coarse lock ([[CoarseLock]]).
  *
  *  [[Sharing.claim]], [[Sharing.claimAt]] and [[Sharing.once]] call it in [[Mode.Concurrent]] (never in
  *  [[Mode.Batch]]). The owner of the shared state supplies one as a `given`, beside the [[Mode]]. The library
@@ -41,7 +42,7 @@ trait CycleHandler:
    */
   def waitCycle(subject: AnyRef): Nothing
 
-/** A thread's work unwinding because it was cancelled, or because it backs off from a wait-for cycle (a
+/** A thread's work unwinding because it was cancelled, or aborted as the victim of a wait-for cycle (a
  *  [[CycleHandler]] may throw one).
  *
  *  Not a failure of what the thread was computing: that is left as it was found, to be computed by the next caller,

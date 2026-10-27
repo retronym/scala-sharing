@@ -15,7 +15,7 @@ import org.junit.Test
  *  releases it, then takes k1 alone. A claimant that is woken from a wait on k2 still has that claim in `waitingOn`
  *  until it runs, and the claimant that released k2 and now asks for k1 (held by the woken one) could read it as a
  *  cycle. The operations return whether `cycle()` was called; sequentially it never is, so any `true` fails the
- *  linearizability check. No claimant can back off, so the cycle path is live.
+ *  linearizability check. No claimant can abort, so the cycle path is live.
  *
  *  Stress runs real threads (the waits are timed, which model checking does not explore). The real cycle, in
  *  `realCycleIsRaisedByExactlyOne`, must still be raised, once.
@@ -54,9 +54,9 @@ class PerKeyClaimsLincheckTest:
     assertEquals("one claimant of the cycle raises it", 1, raised.get)
 
 object PerKeyClaimsLincheckTest:
-  /** A claimant that does not back off from a cycle: it waits, or reports it. */
+  /** A claimant that cannot be a cycle's victim: it waits, or reports the cycle. */
   final class Steadfast extends Claimant:
-    override def canBackOff: Boolean = false
+    override def canAbort: Boolean = false
 
   val what: What = What("signature", null)
 

@@ -21,7 +21,7 @@ import scala.jdk.CollectionConverters.*
 final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler) extends ClaimRegistry:
   import PerKeyClaims.Claim
 
-  def this(currentClaimant: () => Claimant) = this(currentClaimant, BackOff)
+  def this(currentClaimant: () => Claimant) = this(currentClaimant, AbortVictim)
 
   def claim[T](key: AnyRef, kind: Sharing.ClaimKind[Nothing], cycleSubject: AnyRef, op: () => T): T =
     locked(key, kind.what, () => cycles.waitCycle(cycleSubject))(op())
@@ -57,11 +57,11 @@ final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler) 
             lastChain = null
           case chain =>
             val parties = chain.map(_.owner)
-            if me.canBackOff then
-              me.backedOff += 1
+            if me.canAbort then
+              me.aborted += 1
               throw Cancelled()
-            else if parties.exists(_.canBackOff) then
-              () // a party that can back off does so at its next look: wait
+            else if parties.exists(_.canAbort) then
+              () // a party that can abort does so at its next look: wait
             else if parties.forall(p => System.identityHashCode(p.thread) <= System.identityHashCode(me.thread)) then
               // one party reports the cycle (a fixed order of the threads picks it). The chain is read from fields
               // the claimants change as they go: only one seen at two looks, a slice apart, with the same claims, is

@@ -6,10 +6,11 @@ import scala.quoted.*
  *  until the value is stored, then the value.
  *
  *  Opaque, so that a plain read or write of the field does not type-check: the value is stored only by `get`, after
- *  `compute` returns, inside the claim on the owner, with release semantics, and read with acquire semantics. What the
- *  value refers to is seen whole by a reader that finds it, with no further rule on how it is built. The discipline that
+ *  `compute` returns, inside the claim on the owner, with release semantics, and read with acquire semantics. The value is
+ *  therefore safely published (JCIP §3.5): a reader that finds it sees what it refers to, with no further rule on how it
+ *  is built. The discipline that
  *  [[Sharing.once]] leaves to the owner (a store only under the claim, the field the same on both sides, a value
- *  published whole) is the type's.
+ *  safely published) is the type's.
  *
  *  {{{
  *  class Symbol(name: String)(using Mode, ClaimRegistry):
@@ -79,7 +80,7 @@ trait OnceOps:
           r
 
     /** The fact if it is there, else `null`, without claiming: read with acquire semantics in a concurrent mode, so
-     *  what it refers to is seen whole. */
+     *  what it refers to is visible. */
     inline def peek(using inline mode: Mode): T | Null =
       if mode.concurrent then Once.acquireRaw[T](field) else Once.plainRaw[T](field)
 

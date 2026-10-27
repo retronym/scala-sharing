@@ -150,6 +150,10 @@ object Sharing:
 
   /** Runs `op` as the one writer of the lazy facts keyed by `key`, with the evidence of it.
    *
+   *  A claim is a reentrant lock per key whose waits feed a wait-for graph, for deadlock detection. Other threads that
+   *  need the key wait for its holder's computation rather than repeat it, as a loading cache deduplicates in-flight
+   *  loads (Caffeine's `get`, Go's `singleflight`).
+   *
    *  In a concurrent mode this goes through the [[ClaimRegistry]]: the key's claim when threads are parallel, where a wait
    *  that would close a wait-for cycle is reported against `cycleSubject`; the coarse lock, or as is, when threads are
    *  serialised, as the key's [[ClaimKind]] says. In batch mode `op` runs as is. `key`, its kind, `cycleSubject` and the
@@ -221,7 +225,7 @@ object Sharing:
    *      myRef.nn
    *  }}}
    *
-   *  Expands to the double-checked computation
+   *  Expands to double-checked locking
    *
    *  {{{
    *  val v = peek
@@ -232,7 +236,8 @@ object Sharing:
    *  }}}
    *
    *  so a hit is `peek`'s reads and a null test, in every mode. `peek` reads without the claim, so what it reads must be
-   *  published whole (a final-field structure, a volatile, a value stored after what it refers to).
+   *  safely published (JCIP §3.5): a final-field structure, a volatile, a release store. Leaving that to the caller is
+   *  how double-checked locking classically breaks; a [[Once]] field makes the store itself, with release semantics.
    *
    *  @param key          identity of the claim
    *  @param cycleSubject what to report if waiting for the claim would close a wait-for cycle; the key if `null`
@@ -277,7 +282,7 @@ object Sharing:
      *  that can be inside, so finding some thread inside is the holder re-entering its own computation: a cycle, and
      *  `onCycle` is evaluated.
      *
-     *  However `op` ends, it leaves: a computation that unwinds (a cancellation, a back-off, a crash) leaves what it guards
+     *  However `op` ends, it leaves: a computation that unwinds (a cancellation, an abort as a deadlock victim, a crash) leaves what it guards
      *  computable by the next caller. A hand-written "started" flag must remember to do that.
      *
      *  @param onCycle what to do if the computation is entered again by its owner; does not return
