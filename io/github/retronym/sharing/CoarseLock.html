@@ -1,0 +1,772 @@
+<!DOCTYPE html><html data-pathToRoot="../../../../" data-rawLocation="io/github/retronym/sharing/CoarseLock" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>CoarseLock</title><link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico"></link><script type="text/javascript" src="../../../../scripts/theme.js"></script><script type="text/javascript" src="../../../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../../../styles/searchbar.css"></link><link rel="stylesheet" href="../../../../styles/social-links.css"></link><link rel="stylesheet" href="../../../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../../../styles/content-contributors.css"></link><script type="text/javascript" src="../../../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../../../scripts/data.js" defer="true"></script><script>var pathToRoot = "../../../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../../../" class="logo-container"><span class="project-name h300">scala-sharing</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a><div class="projectVersion">snapshot</div></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">scala-sharing</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="docs-nav-button" class="switcher h100 " href="../../../../docs/index.html">Docs</a><a id="api-nav-button" class="switcher h100 selected" href="../../../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../sharing.html"><span class="micon pa"></span><span>io.github.retronym.sharing</span></a></span><div class="ni n1 "><span class="nh "><a href="BackOff$.html"><span class="micon ob"></span><span>BackOff</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Cancelled.html"><span class="micon cl"></span><span>Cancelled</span></a></span></div><div class="ni n1 "><span class="nh "><a href="ClaimRegistry.html"><span class="micon tr"></span><span>ClaimRegistry</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Claimant.html"><span class="micon cl"></span><span>Claimant</span></a></span></div><div class="ni n1 expanded"><span class="nh h100 selected"><a href="#"><span class="micon cl"></span><span>CoarseLock</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Concurrency.html"><span class="micon cl"></span><span>Concurrency</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Concurrency$.html"><span class="micon ob"></span><span>Concurrency</span></a></span></div><div class="ni n1 "><span class="nh "><a href="CycleHandler.html"><span class="micon tr"></span><span>CycleHandler</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Guarded$.html"><span class="micon ob"></span><span>Guarded</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Label.html"><span class="micon cl"></span><span>Label</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Mode$.html"><span class="micon ob"></span><span>Mode</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Mode.html"><span class="micon cl"></span><span>Mode</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Payload$.html"><span class="micon ob"></span><span>Payload</span></a></span></div><div class="ni n1 "><span class="nh "><a href="PayloadOps.html"><span class="micon tr"></span><span>PayloadOps</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="PerKeyClaims$.html"><span class="micon ob"></span><span>PerKeyClaims</span></a></span><div class="ni n2 "><span class="nh "><a href="PerKeyClaims$$Claim.html"><span class="micon cl"></span><span>Claim</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="PerKeyClaims.html"><span class="micon cl"></span><span>PerKeyClaims</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="Published$.html"><span class="micon ob"></span><span>Published</span></a></span><div class="ni n2 "><span class="nh "><a href="Published$$Handle$.html"><span class="micon ob"></span><span>Handle</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="PublishedOps.html"><span class="micon tr"></span><span>PublishedOps</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="Sharing$.html"><span class="micon ob"></span><span>Sharing</span></a></span><div class="ni n2 "><span class="nh "><a href="Sharing$$BlackHole.html"><span class="micon tr"></span><span>BlackHole</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$ClaimKind.html"><span class="micon cl"></span><span>ClaimKind</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Guard.html"><span class="micon cl"></span><span>Guard</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$GuardedVar.html"><span class="micon cl"></span><span>GuardedVar</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Holds.html"><span class="micon cl"></span><span>Holds</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Sharing$$Monitor.html"><span class="micon cl"></span><span>Monitor</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="Stamp.html"><span class="micon cl"></span><span>Stamp</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Stamped.html"><span class="micon cl"></span><span>Stamped</span></a></span></div><div class="ni n1 "><span class="nh "><a href="Stamped$.html"><span class="micon ob"></span><span>Stamped</span></a></span></div><div class="ni n1 "><span class="nh "><a href="What.html"><span class="micon cl"></span><span>What</span></a></span></div><div class="ni n1 "><span class="nh "><a href="benignRace.html"><span class="micon cl"></span><span>benignRace</span></a></span></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../../../index.html">scala-sharing</a>/<a href="../sharing.html">io.github.retronym.sharing</a>/<a href="CoarseLock.html">CoarseLock</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon cl"></span></span>
+ <h1 class="h600 single">CoarseLock</h1>
+</div>
+<div class="fqname body-large">
+ <span>io.github.retronym.sharing.CoarseLock</span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="signature-short"><span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">class </span></span><a href="CoarseLock.html" t="n" class="documentableName ">CoarseLock</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">onWait</span>: (<span data-unresolved-link="" t="t">Long</span>, <span data-unresolved-link="" t="t">String</span>, <span data-unresolved-link="" t="t">String</span>, <span data-unresolved-link="" t="t">String</span>) <span t="k">=&gt;</span> <span data-unresolved-link="" t="t">Unit</span> = ...)<span t="k"> extends </span><span data-unresolved-link="" t="t">ReentrantLock</span><span t="k">, </span></span><span class="signature-long"><a href="ClaimRegistry.html" t="t">ClaimRegistry</a></span>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc">
+  <p>A <code>ClaimRegistry</code> for serialised threads: one reentrant lock, taken by a claim whose kind says so (<code>ClaimKind.lockWhenSerialised</code>), so that one thread computes at a time.</p>
+  <p>It also keeps what its holder is doing (the outermost acquisition, the root of the holder's work, and the innermost), so that a thread that has to wait can report how long it waited and what for (<code>onWait</code>). The labels are kept as objects and rendered only by a thread that waited.</p>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Value parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">onWait</dt>
+   <dd class="body-medium">
+    <p>called by a thread that had to wait, once it has the lock, with the nanoseconds it waited, what the holder's root and innermost work were when the wait began, and the holder's thread name</p>
+   </dd>
+  </dl>
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">Source</dt>
+   <dd class="body-medium">
+    <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L15" target="_blank">CoarseLock.scala</a>
+   </dd>
+   <dt class="body-small">Graph</dt>
+   <dd class="body-medium">
+    <div id="inheritance-diagram" class="diagram-class showGraph">
+     <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
+     <svg id="graph"></svg>
+     <script type="text/dot" id="dot"> digraph g {
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">class <a href=\"CoarseLock.html\" t=\"n\">CoarseLock</a></span>", class="class vertex"];
+node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">ReentrantLock</span></span>", class="class vertex"];
+node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
+node3 [id=node3, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
+node5 [id=node5, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Lock</span></span>", class="trait vertex"];
+node6 [id=node6, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Serializable</span></span>", class="trait vertex"];
+node7 [id=node7, label="<span style=\"color: #FFFFFF;\">trait <a href=\"ClaimRegistry.html\" t=\"n\">ClaimRegistry</a></span>", class="trait vertex"];
+
+
+ node0 -> node1;
+node1 -> node2;
+node2 -> node3;
+node2 -> node4;
+node4 -> node3;
+node1 -> node5;
+node5 -> node2;
+node1 -> node6;
+node6 -> node3;
+node0 -> node7;
+node7 -> node2;
+
+}
+</script>
+    </div>
+   </dd>
+   <dt class="body-small">Supertypes</dt>
+   <dd class="body-medium">
+    <div class="mono-small-block supertypes">
+     <div>
+      trait <a href="ClaimRegistry.html" t="n">ClaimRegistry</a>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">ReentrantLock</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Serializable</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Lock</span>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Object</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Matchable</span>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Any</span>
+     </div>
+     <span class="show-all-code show-content text-button h100">Show all</span>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div>
+  <input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Value-members">
+     <div data-togglable="Value members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Value members" class="h400">Value members</h3>
+      </div>
+      <section id="Concrete-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Concrete methods</h4>
+        </div>
+        <div class="documentableElement" id="claim-fffffc31">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#claim-fffffc31" t="n" class="documentableName ">claim</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">key</span>: <span data-unresolved-link="" t="t">AnyRef</span>, <span t="k"></span><span data-unresolved-link="" t="n">kind</span>: <a href="Sharing$$ClaimKind.html" t="t">ClaimKind</a>[<span data-unresolved-link="" t="t">Nothing</span>], <span t="k"></span><span data-unresolved-link="" t="n">cycleSubject</span>: <span data-unresolved-link="" t="t">AnyRef</span>, <span t="k"></span><span data-unresolved-link="" t="n">op</span>: () <span t="k">=&gt;</span> <span data-unresolved-link="" t="t">T</span>): <span data-unresolved-link="" t="t">T</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Runs <code>op</code> as the one writer of the lazy facts keyed by <code>key</code>: holding the claim on it, or the coarse lock if <code>kind</code> says serialised threads take it, or as is if they need no claim. Re-entry by the holder runs <code>op</code> at once.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Runs <code>op</code> as the one writer of the lazy facts keyed by <code>key</code>: holding the claim on it, or the coarse lock if <code>kind</code> says serialised threads take it, or as is if they need no claim. Re-entry by the holder runs <code>op</code> at once.</p>
+              <p>A wait that would close a wait-for cycle is reported against <code>cycleSubject</code> (to a <a href="CycleHandler.html">CycleHandler</a>).</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">cycleSubject</dt>
+              <dd class="body-medium">
+               <p>what to report if waiting for the claim would close a cycle</p>
+              </dd>
+              <dt class="body-small">key</dt>
+              <dd class="body-medium">
+               <p>identity of the claim (compared by reference, so use a stable object)</p>
+              </dd>
+              <dt class="body-small">kind</dt>
+              <dd class="body-medium">
+               <p>how this kind of key is claimed, from the key's <a href="Sharing$$ClaimKind.html">Sharing.ClaimKind</a></p>
+              </dd>
+              <dt class="body-small">op</dt>
+              <dd class="body-medium">
+               <p>the code to run as the one writer</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L17" target="_blank">CoarseLock.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="holderNow-0">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#holderNow-0" t="n" class="documentableName ">holderNow</a>: <span data-unresolved-link="" t="t">String</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Who holds the lock and the root of what it is doing, or "".</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Who holds the lock and the root of what it is doing, or "".</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L53" target="_blank">CoarseLock.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="lockFor-fffffec9">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#lockFor-fffffec9" t="n" class="documentableName ">lockFor</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">what</span>: <a href="What.html" t="t">What</a>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Acquire the lock to do <code>what</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Acquire the lock to do <code>what</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L28" target="_blank">CoarseLock.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="locked-fffff492" data-f-keywords="inline">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">inline </span></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#locked-fffff492" t="n" class="documentableName ">locked</a>[<span t="k"></span><span data-unresolved-link="" t="t">T</span>](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">what</span>: <a href="What.html" t="t">What</a>)(<span t="k"></span><span t="k">inline </span><span data-unresolved-link="" t="n">op</span>: <span data-unresolved-link="" t="t">T</span>): <span data-unresolved-link="" t="t">T</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Run <code>op</code> holding the lock for <code>what</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Run <code>op</code> holding the lock for <code>what</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L58" target="_blank">CoarseLock.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="unlockFor-94c">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#unlockFor-94c" t="n" class="documentableName ">unlockFor</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Release an acquisition made by <code>lockFor</code>.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Release an acquisition made by <code>lockFor</code>.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Source</dt>
+              <dd class="body-medium">
+               <a href="https://github.com/retronym/scala-sharing/blob/main/src/io/github/retronym/sharing/CoarseLock.scala#L44" target="_blank">CoarseLock.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+      <section id="Inherited-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Inherited methods</h4>
+        </div>
+        <div class="documentableElement" id="getHoldCount-ffffff27" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#getHoldCount-ffffff27" t="n" class="documentableName ">getHoldCount</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Int</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="getQueueLength-ffffff27" data-f-keywords="final" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#getQueueLength-ffffff27" t="n" class="documentableName ">getQueueLength</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Int</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="getWaitQueueLength-e49" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#getWaitQueueLength-e49" t="n" class="documentableName ">getWaitQueueLength</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">x$0</span>: <span data-unresolved-link="" t="t">Condition</span>): <span data-unresolved-link="" t="t">Int</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="hasQueuedThread-fffffbc2" data-f-keywords="final" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#hasQueuedThread-fffffbc2" t="n" class="documentableName ">hasQueuedThread</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">x$0</span>: <span data-unresolved-link="" t="t">Thread</span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="hasQueuedThreads-fffff760" data-f-keywords="final" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#hasQueuedThreads-fffff760" t="n" class="documentableName ">hasQueuedThreads</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="hasWaiters-fffff582" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#hasWaiters-fffff582" t="n" class="documentableName ">hasWaiters</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">x$0</span>: <span data-unresolved-link="" t="t">Condition</span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="isFair-fffff760" data-f-keywords="final" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"><span t="k">final </span></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#isFair-fffff760" t="n" class="documentableName ">isFair</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="isHeldByCurrentThread-fffff760" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#isHeldByCurrentThread-fffff760" t="n" class="documentableName ">isHeldByCurrentThread</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="isLocked-fffff760" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#isLocked-fffff760" t="n" class="documentableName ">isLocked</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="lock-94c" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#lock-94c" t="n" class="documentableName ">lock</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="lockInterruptibly-94c" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#lockInterruptibly-94c" t="n" class="documentableName ">lockInterruptibly</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="newCondition-29e" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#newCondition-29e" t="n" class="documentableName ">newCondition</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Condition</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="toString-665" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#toString-665" t="n" class="documentableName ">toString</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">String</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Returns a string representation of the object.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Returns a string representation of the object.</p>
+              <p>The default representation is platform dependent.</p>
+             </div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Returns</dt>
+              <dd class="body-medium">
+               <p>a string representation of the object.</p>
+              </dd>
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="tryLock-6dc" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#tryLock-6dc" t="n" class="documentableName ">tryLock</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">x$0</span>: <span data-unresolved-link="" t="t">Long</span>, <span t="k"></span><span data-unresolved-link="" t="n">x$1</span>: <span data-unresolved-link="" t="t">TimeUnit</span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="tryLock-fffff760" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#tryLock-fffff760" t="n" class="documentableName ">tryLock</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Boolean</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="unlock-94c" data-f-inherited="ReentrantLock">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="CoarseLock.html#unlock-94c" t="n" class="documentableName ">unlock</a>(<span t="k"></span>): <span data-unresolved-link="" t="t">Unit</span>
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="cover">
+             <div class="doc"></div>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">Inherited from:</dt>
+              <dd class="body-medium">
+               <span data-unresolved-link="">ReentrantLock</span>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Value parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li><li><a href="#Inherited-methods">Inherited methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html><html data-githubContributorsUrl="https://api.github.com/repos/retronym/scala-sharing" data-githubContributorsFilename="target/site-root/_docs/index.md" data-pathToRoot="../" data-rawLocation="docs/index" data-dynamicSideMenu="false"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>scala-sharing</title><link rel="shortcut icon" type="image/x-icon" href="../favicon.ico"></link><script type="text/javascript" src="../scripts/theme.js"></script><script type="text/javascript" src="../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../styles/theme/bundle.css"></link><link rel="stylesheet" href="../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../styles/dotty-icons.css"></link><link rel="stylesheet" href="../styles/filter-bar.css"></link><link rel="stylesheet" href="../styles/searchbar.css"></link><link rel="stylesheet" href="../styles/social-links.css"></link><link rel="stylesheet" href="../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../styles/content-contributors.css"></link><script type="text/javascript" src="../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../scripts/data.js" defer="true"></script><script>var pathToRoot = "../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../" class="logo-container"><span class="project-name h300">scala-sharing</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a><div class="projectVersion">snapshot</div></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">scala-sharing</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="docs-nav-button" class="switcher h100 selected" href="index.html">Docs</a><a id="api-nav-button" class="switcher h100 " href="../index.html">API</a></div><nav id="docs-nav" class="side-menu"></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="index.html">scala-sharing</a></div><div id="content" class="body-medium"><div><p>Concurrency primitives for state shared between threads, for Scala 3. They come from the Scala 3 compiler's work on several readers over one symbol table (<a href="https://github.com/retronym/scala3/pull/84">retronym/scala3#84</a>) and do not depend on the compiler.</p>
+<p>Source: <a href="https://github.com/retronym/scala-sharing">https://github.com/retronym/scala-sharing</a>. Package: <code>io.github.retronym.sharing</code>.</p>
+<p>Two ideas run through it:</p>
+<ul>
+ <li><strong>Batch mode costs nothing.</strong> The owner of the state picks a <code>Mode</code> once. In <code>Mode.Batch</code> every operation is the plain code it wraps: an <code>inline def</code> that compiles to a test of a final field and the original expression, with no lock and no allocation. Code written against the library runs single-threaded at its old speed.</li>
+ <li><strong>Guarded state is reachable only with evidence.</strong> A claim or a monitor hands its code a phantom-typed evidence parameter (<code>Holds[key.type]</code>, <code>Monitor[lock.type]</code>), and the guarded state is reachable only through methods that take one. Touching it outside the claim or lock is a compile error, not a race. At run time the evidence is one shared object.</li>
+</ul>
+<section id="highlights">
+ <h2 class="h500"><a href="#highlights" class="anchor"></a>Highlights</h2>
+</section>
+<section id="a-lazy-fact-computed-once-by-one-writer">
+ <h3 class="h400"><a href="#a-lazy-fact-computed-once-by-one-writer" class="anchor"></a>A lazy fact, computed once by one writer</h3>
+ <div class="snippet mono-small-block" scala-snippet="">
+  <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>import io.github.retronym.sharing.*
+</span><span line-number="2" class=""><span class="tooltip-container"></span>
+</span><span line-number="3" class=""><span class="tooltip-container"></span>class Symbol(name: String)(using Mode, ClaimRegistry):
+</span><span line-number="4" class=""><span class="tooltip-container"></span>  private var myInfo: Info | Null = null
+</span><span line-number="5" class=""><span class="tooltip-container"></span>  // the writer's state: reachable only with the claim's evidence
+</span><span line-number="6" class=""><span class="tooltip-container"></span>  private def store(i: Info)(using Sharing.Holds[this.type]): Unit = myInfo = i
+</span><span line-number="7" class=""><span class="tooltip-container"></span>
+</span><span line-number="8" class=""><span class="tooltip-container"></span>  def info: Info =
+</span><span line-number="9" class=""><span class="tooltip-container"></span>    Sharing.once(this)(myInfo):   // peek; on a miss, claim `this` and peek again
+</span><span line-number="10" class=""><span class="tooltip-container"></span>      val i = computeInfo()
+</span><span line-number="11" class=""><span class="tooltip-container"></span>      store(i)
+</span><span line-number="12" class=""><span class="tooltip-container"></span>      i
+</span><span line-number="13" class=""><span class="tooltip-container"></span>
+</span><span line-number="14" class=""><span class="tooltip-container"></span>object Symbol:
+</span><span line-number="15" class=""><span class="tooltip-container"></span>  given Sharing.ClaimKind[Symbol] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p><code>store(i)</code> outside <code>once</code> or <code>claim</code> does not compile: "this code must run as the one writer of (Symbol.this : Symbol)". A hit is the field read and a null test, in every mode. <code>Sharing.BlackHole</code> adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable.</p>
+</section>
+<section id="state-behind-a-monitor">
+ <h3 class="h400"><a href="#state-behind-a-monitor" class="anchor"></a>State behind a monitor</h3>
+ <div class="snippet mono-small-block" scala-snippet="">
+  <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>object registry extends Sharing.Guard:
+</span><span line-number="2" class=""><span class="tooltip-container"></span>  private val byName = guarded(mutable.HashMap.empty[String, Entry])
+</span><span line-number="3" class=""><span class="tooltip-container"></span>  def add(e: Entry)(using Mode): Unit = locked(byName()(e.name) = e)
+</span><span line-number="4" class=""><span class="tooltip-container"></span>  def names(using Mode): List[String] = locked(byName().keys.toList)
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p><code>byName()</code> outside <code>locked</code> does not compile. <code>Guarded</code> is an opaque type over the value itself, so the field costs what it did.</p>
+</section>
+<section id="releaseacquire-publishing-checked-at-compile-time">
+ <h3 class="h400"><a href="#releaseacquire-publishing-checked-at-compile-time" class="anchor"></a>Release/acquire publishing, checked at compile time</h3>
+ <div class="snippet mono-small-block" scala-snippet="">
+  <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>class Entry:
+</span><span line-number="2" class=""><span class="tooltip-container"></span>  private[mypkg] var version: Published[Int] = Published(0)   // not private: see Published.handle
+</span><span line-number="3" class=""><span class="tooltip-container"></span>  private var text: Payload[Entry, "version", String] = Payload("")
+</span><span line-number="4" class=""><span class="tooltip-container"></span>
+</span><span line-number="5" class=""><span class="tooltip-container"></span>  def read(expected: Int): String | Null =
+</span><span line-number="6" class=""><span class="tooltip-container"></span>    val snap = version.acquired                 // getAcquire
+</span><span line-number="7" class=""><span class="tooltip-container"></span>    if snap.value == expected then text.after(snap) else null
+</span><span line-number="8" class=""><span class="tooltip-container"></span>
+</span><span line-number="9" class=""><span class="tooltip-container"></span>  def write(v: Int, t: String): Unit =
+</span><span line-number="10" class=""><span class="tooltip-container"></span>    version.publishing(v):                      // stores, then setRelease
+</span><span line-number="11" class=""><span class="tooltip-container"></span>      text := t
+</span><span line-number="12" class=""><span class="tooltip-container"></span>
+</span><span line-number="13" class=""><span class="tooltip-container"></span>object Entry:
+</span><span line-number="14" class=""><span class="tooltip-container"></span>  val versionHandle: Published.Handle[Entry, "version"] = Published.handle
+</span><span line-number="15" class=""><span class="tooltip-container"></span>  given Published.Handle[Entry, "version"] = versionHandle
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p>Macros over a <code>VarHandle</code> that C2 folds. A plain read or store does not type-check. A payload stored outside its publisher's block, read after another object's acquire, or with the block's evidence leaked, is a compile error.</p>
+</section>
+<section id="a-value-with-the-stamp-it-was-computed-at">
+ <h3 class="h400"><a href="#a-value-with-the-stamp-it-was-computed-at" class="anchor"></a>A value with the stamp it was computed at</h3>
+ <div class="snippet mono-small-block" scala-snippet="">
+  <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>private var exports: Stamped[PerGeneration, List[String]] = Stamped.Empty
+</span><span line-number="2" class=""><span class="tooltip-container"></span>def exportedNames(using Stamp[PerGeneration]): List[String] =
+</span><span line-number="3" class=""><span class="tooltip-container"></span>  exports.cached(computeExports())
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p>One immutable object in one field, so a reader sees the stamp and value whole with no fences. The stamp's kind is a phantom type, so a field is never read with one kind of stamp and written with another.</p>
+</section>
+<section id="serialised-or-parallel-chosen-once">
+ <h3 class="h400"><a href="#serialised-or-parallel-chosen-once" class="anchor"></a>Serialised or parallel, chosen once</h3>
+ <div class="snippet mono-small-block" scala-snippet="">
+  <pre><code class="language-scala"><span line-number="1" class=""><span class="tooltip-container"></span>val concurrency = Concurrency.Parallel        // or Serialised, or Batch
+</span><span line-number="2" class=""><span class="tooltip-container"></span>given Mode = concurrency.mode
+</span><span line-number="3" class=""><span class="tooltip-container"></span>given ClaimRegistry = concurrency.newRegistry(() =&gt; claimantOfThisThread())
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p><code>CoarseLock</code> serialises the threads under one reentrant lock and records what its holder is doing for lock-wait reports. <code>PerKeyClaims</code> gives each key its own claim, detects wait-for cycles between claimants, and has one party back off (<code>Cancelled</code>) or report the cycle.</p>
+</section>
+<section id="contents">
+ <h2 class="h500"><a href="#contents" class="anchor"></a>Contents</h2>
+ <ul>
+  <li><code>Sharing</code>: <code>once</code>, <code>claim</code>, <code>claimAt</code>, <code>Holds</code>, <code>unguarded</code>; <code>Guard</code>, <code>Guarded</code>, <code>GuardedVar</code>, <code>serialised</code>, <code>locking</code>, <code>Monitor</code>, <code>unlocked</code>; <code>ClaimKind</code>; <code>BlackHole</code>.</li>
+  <li><code>Published</code>, <code>Payload</code>: release/acquire fields. <code>Publish</code>: release/acquire array slots.</li>
+  <li><code>Stamped</code>, <code>Stamp</code>.</li>
+  <li><code>ClaimRegistry</code>, <code>CoarseLock</code>, <code>PerKeyClaims</code>, <code>Claimant</code>, <code>CycleHandler</code>, <code>Cancelled</code>, <code>What</code>, <code>Label</code>.</li>
+  <li><code>Mode</code>, <code>Concurrency</code>, <code>benignRace</code>.</li>
+ </ul>
+ <p>The tests are Lincheck model-checking and stress suites, one section per promise, including a toy compiler symbol table and a wait-for cycle, and compile-time checks that misuse of <code>Published</code> is rejected.</p>
+</section>
+<section id="related-work">
+ <h2 class="h500"><a href="#related-work" class="anchor"></a>Related work</h2>
+ <p>The evidence types are capabilities in phantom types. That idea has relatives in several languages.</p>
+ <ul>
+  <li><strong>Clang Thread Safety Analysis.</strong> <code>GUARDED_BY(mu)</code> on data, <code>REQUIRES(mu)</code> on functions, <code>ACQUIRE</code>/<code>RELEASE</code> on lock operations, and <code>NO_THREAD_SAFETY_ANALYSIS</code> to opt out. <code>Holds</code>/<code>Monitor</code> play the part of <code>REQUIRES</code> and <code>unguarded</code>/<code>unlocked</code> the part of the opt-out, scoped to one access with a reason. Clang checks annotations in a separate analysis; here the type checker does it, because the capability is a parameter.</li>
+  <li><strong>Rust.</strong> <code>Mutex&lt;T&gt;</code> puts the data inside the lock so it is reachable only through a <code>MutexGuard</code>; <code>Guard</code>/<code>Guarded</code> is that shape. <code>Send</code> and <code>Sync</code> are marker traits for what may cross or be shared between threads. <code>OnceLock</code>/<code>LazyLock</code> are the single-writer lazy value of <code>once</code>. GhostCell and the <code>qcell</code> crate separate permission from data with a branded token (a lifetime or marker type), as <code>Holds[key.type]</code> brands evidence with a singleton type. Salsa (behind rust-analyzer) stamps derived values with a revision and detects query cycles, as <code>Stamped</code> and <code>BlackHole</code> do.</li>
+  <li><strong>Haskell.</strong> The <code>ST</code> monad's rank-2 phantom <code>s</code> keeps an <code>STRef</code> from escaping its computation, as a singleton-typed <code>Holds</code> keeps evidence for one key from serving another. Kiselyov and Shan's <em>Lightweight Static Capabilities</em> and Noonan's <em>Ghosts of Departed Proofs</em> use phantom-typed names and proofs to carry facts the type checker enforces, which is the role of <code>Holds</code>, <code>Monitor</code> and <code>Published.Acquired</code>. <code>MVar</code> and STM's <code>TVar</code> are runtime alternatives.</li>
+  <li><strong>Java.</strong> Error Prone's <code>@GuardedBy</code> and <code>@LazyInit</code> (the source of <code>benignRace</code>), and the Checker Framework's Lock Checker. <code>VarHandle</code> access modes are what <code>Published</code> and <code>Publish</code> compile to.</li>
+  <li><strong>Scala.</strong> Capture checking (<code>-language:experimental.captureChecking</code>) tracks capabilities in types too, at the level of references rather than one parameter per operation.</li>
+ </ul>
+</section>
+<section id="build">
+ <h2 class="h500"><a href="#build" class="anchor"></a>Build</h2>
+ <div class="snippet mono-small-block">
+  <pre><code class="language-"><span line-number="1" class=""><span class="tooltip-container"></span>sbt test
+</span><span line-number="2" class=""><span class="tooltip-container"></span>sbt doc
+</span></code></pre>
+  <div class="buttons"></div>
+ </div>
+ <p>JDK 17 or later.</p>
+</section>
+<section id="license">
+ <h2 class="h500"><a href="#license" class="anchor"></a>License</h2>
+ <p>Apache 2.0. Derived from the Scala 3 compiler; see <code>NOTICE</code>.</p>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#highlights">Highlights</a><ul><li><a href="#a-lazy-fact-computed-once-by-one-writer">A lazy fact, computed once by one writer</a></li><li><a href="#state-behind-a-monitor">State behind a monitor</a></li><li><a href="#releaseacquire-publishing-checked-at-compile-time">Release/acquire publishing, checked at compile time</a></li><li><a href="#a-value-with-the-stamp-it-was-computed-at">A value with the stamp it was computed at</a></li><li><a href="#serialised-or-parallel-chosen-once">Serialised or parallel, chosen once</a></li></ul></li><li><a href="#contents">Contents</a></li><li><a href="#related-work">Related work</a></li><li><a href="#build">Build</a></li><li><a href="#license">License</a></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><a href="https://github.com/retronym/scala-sharing"><button class="icon-button gh"></button></a><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
