@@ -30,6 +30,8 @@ object Symbol:
 
 The lock discipline is the field's type, not the class's: a plain read or store of `myInfo` does not compile, and the library makes the only store, inside the claim on the owner, after `compute` returns. In `Mode.Concurrent` the store is a release and the read an acquire, so the value is seen whole however it was built; in `Mode.Batch` both are plain, and a hit is the field read and a null test. `compute` is given `Sharing.Holds[this.type]`, the evidence for the owner's other writer state. `Sharing.BlackHole` adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses `Sharing.once` or `Sharing.claim`, with the store written by the owner behind a method that takes `Holds`.
 
+Compared with a Scala 3 `lazy val`, which is also computed once, thread-safely, and left computable if its initialiser throws: a `lazy val` pays for thread safety in every instance (or never, with `@threadUnsafe`), where `Once` follows the owner's `Mode`, plain in batch. Its waiters block on the initialising thread with no wait-for graph, so two initialisers that need each other's values on two threads deadlock, where `Once` waits through the `ClaimRegistry`, which detects the cycle, aborts a victim and reports what each holder was doing. It cannot be reset, where `Once` has `reset()` for invalidation, under the claim. And its initialiser is given no evidence, where `compute` is given `Holds[this.type]` for the owner's other writer state. The `lazy val` costs no boilerplate and can hold `null`; `Once` needs a handle and a `ClaimKind` beside the class, and uses `null` for "not yet".
+
 ### State behind a monitor
 
 ```scala
@@ -40,6 +42,16 @@ object registry extends Sharing.Guard:
 ```
 
 `byName()` outside `locked` does not compile. `Guarded` is an opaque type over the value itself, so the field costs what it did.
+
+The lock is the guard object's own monitor: `locked(op)` is `registry.synchronized(op)` in `Mode.Concurrent` and `op` in `Mode.Batch`, and `alwaysLocked` takes it in every mode. `Sharing.serialised(obj)` and `Sharing.locking(obj)` do the same on another object's monitor, for state that cannot move into a `Guard`. The monitor is reentrant, so a `locked` block may call another method of the same guard.
+
+The evidence proves the monitor is held when the state is touched; it does not prevent deadlock, which is the caller's to avoid:
+
+- **Keep a locked block a leaf.** Do not call out of it into code that may take another lock: a callback, a listener, another guard's `locked`, blocking I/O. Two threads that each hold one monitor and want the other's deadlock, and nothing here sees it.
+- **Never take a claim, or compute a `Once`, inside a locked block.** A claim may wait for another thread's computation, which may need this monitor. Monitor waits are not in the wait-for graph, so `PerKeyClaims` cannot detect that cycle and abort a victim. The reverse is fine: a short locked block inside a claim.
+- **If monitors must nest, take them in one global order.**
+- **Do not let the guarded value escape.** `locked(byName())` returns the mutable map itself, and the type allows it; return a copy or an immutable view, as `names` does with `toList`.
+- **The monitor is public.** Code outside that synchronises on the guard object takes the same lock, so keep the guard private, or treat the object as the lock and nothing else.
 
 ### Release/acquire publishing, checked at compile time
 
