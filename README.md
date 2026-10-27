@@ -34,7 +34,7 @@ object Symbol:
 
 </div>
 <input type="radio" name="once" id="once-1"><label for="once-1"><strong>Compiled</strong></label>
-<div class="tab scroll">
+<div class="tab">
 
 ```scala
 def info: Info =
@@ -120,7 +120,7 @@ object registry extends Sharing.Guard:
 
 </div>
 <input type="radio" name="guard" id="guard-1"><label for="guard-1"><strong>Compiled</strong></label>
-<div class="tab scroll">
+<div class="tab">
 
 ```scala
 object registry extends Sharing.Guard:

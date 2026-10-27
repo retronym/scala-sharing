@@ -23,9 +23,6 @@
 .tabs > .tab { grid-row: 2; grid-column: 1 / -1; min-width: 0; visibility: hidden; display: flex; flex-direction: column; }
 /* the code block (Scaladoc's snippet) fills its panel, so every tab's box is the same size */
 .tabs > .tab > * { flex: 1 1 auto; }
-/* a panel that may be the longest (the Compiled one) sets no height of its own: the others set the row's, and it
- * scrolls within it */
-.tabs > .tab.scroll { contain: size; overflow: auto; }
 .tabs > input:checked + label { border-bottom-color: currentColor; opacity: 1; }
 .tabs > input:checked + label + .tab { visibility: visible; }
 .tabs > input:focus-visible + label { outline: 2px solid currentColor; }
