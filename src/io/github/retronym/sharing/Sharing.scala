@@ -80,6 +80,8 @@ object Sharing:
   @implicitNotFound("this code must run as the one writer of ${K}: inside Sharing.claim or Sharing.once on it, or a completion of it")
   sealed abstract class Holds[K]
   private object held extends Holds[Any]
+  /** The evidence, for the library's own operations that take a claim as [[claim]] does (`Once.get`). */
+  private[sharing] inline def evidence[K]: Holds[K] = held.asInstanceOf[Holds[K]]
 
   /** Evidence of `claim(key)` without it, for an access that races on purpose, or for a claim that is taken elsewhere
    *  (say, higher up the same thread's stack). `why` says why it is safe, like Clang's `NO_THREAD_SAFETY_ANALYSIS`, scoped

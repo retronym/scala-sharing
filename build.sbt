@@ -5,6 +5,10 @@ ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses
 // the site's front page is the README, copied into a generated site root for scaladoc
 lazy val siteRoot = taskKey[File]("the scaladoc site root, with the README as its index")
 
+// the README's examples as the compiler expands them, for checking the panels that show each mode's code path
+addCommandAlias("printExpansions",
+  """; set Test / scalacOptions += "-Vprint:inlining" ; Test / clean ; Test / compile ; set Test / scalacOptions -= "-Vprint:inlining"""")
+
 lazy val root = project.in(file("."))
   .settings(
     name := "scala-sharing",
@@ -19,7 +23,10 @@ lazy val root = project.in(file("."))
       val dir = target.value / "site-root"
       val readme = IO.read(baseDirectory.value / "README.md")
         .replace("Docs and API: <https://retronym.github.io/scala-sharing/docs/index.html>. ", "Source: <https://github.com/retronym/scala-sharing>. ")
-      IO.write(dir / "_docs" / "index.md", readme.linesIterator.dropWhile(_.startsWith("# ")).mkString("\n"))
+      // the tabs' style, which GitHub would strip from the README, as a block at the top of the page
+      val style = IO.read(baseDirectory.value / "site" / "tabs.css")
+      val body = readme.linesIterator.dropWhile(_.startsWith("# ")).mkString("\n")
+      IO.write(dir / "_docs" / "index.md", s"<style>\n$style</style>\n\n$body")
       dir
     },
     Compile / doc / scalacOptions ++= Seq("-siteroot", siteRoot.value.getPath),

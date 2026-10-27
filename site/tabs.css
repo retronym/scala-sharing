@@ -1,0 +1,26 @@
+/* Tabs for the README's code panels, with no script: a radio input, then its label, then its panel, per tab.
+ * A grid: the labels fill the first row's columns in turn; the panels all share the second row's one cell, spanning
+ * every column, so the row is as tall as the tallest panel and switching tabs does not move the page. The checked
+ * input's panel is visible; the others keep their space. Up to four tabs. GitHub strips the inputs and this style,
+ * so there the panels read stacked, each under its label. */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, max-content) 1fr;
+  column-gap: 0.25em;
+  margin: 1em 0;
+}
+.tabs > input { position: absolute; opacity: 0; pointer-events: none; }
+.tabs > label {
+  grid-row: 1;
+  cursor: pointer;
+  padding: 0.25em 0.75em;
+  border-bottom: 2px solid transparent;
+  opacity: 0.7;
+}
+.tabs > label:hover { opacity: 1; }
+.tabs > .tab { grid-row: 2; grid-column: 1 / -1; min-width: 0; visibility: hidden; display: flex; flex-direction: column; }
+/* the code block (Scaladoc's snippet) fills its panel, so every tab's box is the same size */
+.tabs > .tab > * { flex: 1 1 auto; }
+.tabs > input:checked + label { border-bottom-color: currentColor; opacity: 1; }
+.tabs > input:checked + label + .tab { visibility: visible; }
+.tabs > input:focus-visible + label { outline: 2px solid currentColor; }

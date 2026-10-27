@@ -12,6 +12,11 @@ import scala.quoted.*
  *  happens-before only to volatiles, monitors and thread start and join; Doug Lea's "Using JDK 9 Memory Order Modes"
  *  describes these modes.
  *
+ *  The accesses take no [[Mode]]: they are release and acquire in [[Mode.Batch]] too. The cost to batch is deemed low
+ *  enough to do this unconditionally: on x86 they are plain moves, constraining only how the JIT reorders around them;
+ *  on ARM an `ldar` or `stlr` in place of a plain load or store. A test of the mode would cost about what it saves on
+ *  one access, and without a mode the protocol serves code that has none.
+ *
  *  Opaque, so that a plain read or write of the field does not type-check: the only ways in are `acquire`, `release`
  *  and, where the protocol allows a plain access, `plain` and `setPlain`, named so that they can be found and counted.
  *
