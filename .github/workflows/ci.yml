@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - run: sbt -batch test
+
+  # Publishes the Scaladoc site (the README as its front page) to the gh-pages branch, which GitHub Pages serves.
+  # Not gated on `test`: the docs follow main even while a stress run is slow or flaky on a small runner.
+  docs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - run: sbt -batch doc
+      - name: Push to gh-pages
+        run: |
+          git fetch origin gh-pages
+          git worktree add --detach site origin/gh-pages
+          cd site
+          git rm -rqf .
+          cp -R ../target/scala-*/api/. .
+          touch .nojekyll
+          git add -A
+          if git diff --cached --quiet; then echo "docs unchanged"; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Scaladoc snapshot of main at ${GITHUB_SHA::7}"
+          git push origin HEAD:gh-pages
