@@ -1,3 +1,5 @@
+/* Style for the site's front page, the README, injected by the build (GitHub would strip it from the README). */
+
 /* Tabs for the README's code panels, with no script: a radio input, then its label, then its panel, per tab.
  * A grid: the labels fill the first row's columns in turn; the panels all share the second row's one cell, spanning
  * every column, so the row is as tall as the tallest panel and switching tabs does not move the page. The checked
@@ -21,6 +23,13 @@
 .tabs > .tab { grid-row: 2; grid-column: 1 / -1; min-width: 0; visibility: hidden; display: flex; flex-direction: column; }
 /* the code block (Scaladoc's snippet) fills its panel, so every tab's box is the same size */
 .tabs > .tab > * { flex: 1 1 auto; }
+/* a panel that may be the longest (the Compiled one) sets no height of its own: the others set the row's, and it
+ * scrolls within it */
+.tabs > .tab.scroll { contain: size; overflow: auto; }
 .tabs > input:checked + label { border-bottom-color: currentColor; opacity: 1; }
 .tabs > input:checked + label + .tab { visibility: visible; }
 .tabs > input:focus-visible + label { outline: 2px solid currentColor; }
+
+/* Links into the API: Scaladoc sets code in a link as quoted body text; keep it code, as on GitHub */
+#content a code { font-family: "DejaVu Sans Mono", monospace; font-size: 0.9em; }
+#content a code::before, #content a code::after { content: none; }

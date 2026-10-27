@@ -33,7 +33,33 @@ object Symbol:
 ```
 
 </div>
-<input type="radio" name="once" id="once-1"><label for="once-1"><strong>Mode.Batch</strong></label>
+<input type="radio" name="once" id="once-1"><label for="once-1"><strong>Compiled</strong></label>
+<div class="tab scroll">
+
+```scala
+def info: Info =
+  if mode.concurrent then                       // mode: the owner's given, a final field
+    val v = Symbol.myInfoHandle.getAcquire(this)
+    if v != null then v
+    else registry.claim(this, Symbol.given_ClaimKind_Symbol, this, () =>
+      val v1 = this.myInfo
+      if v1 != null then v1
+      else
+        val r = computeInfo()
+        Symbol.myInfoHandle.setRelease(this, r)
+        r
+    )
+  else
+    val v = this.myInfo
+    if v != null then v
+    else
+      val r = computeInfo()
+      this.myInfo = r
+      r
+```
+
+</div>
+<input type="radio" name="once" id="once-2"><label for="once-2"><strong>Batch path</strong></label>
 <div class="tab">
 
 ```scala
@@ -47,7 +73,7 @@ def info: Info =
 ```
 
 </div>
-<input type="radio" name="once" id="once-2"><label for="once-2"><strong>Mode.Concurrent</strong></label>
+<input type="radio" name="once" id="once-3"><label for="once-3"><strong>Concurrent path</strong></label>
 <div class="tab">
 
 ```scala
@@ -73,6 +99,8 @@ def info: Info =
 </div>
 </div>
 
+`Mode` is a runtime value, the owner's given, so the Compiled tab is what every call site holds: both paths behind a test of `mode.concurrent`, a field load and a branch. The path tabs show each side alone. C2 profiles the branch, so in a process that only ever runs one mode the other path is left out of the compiled method (an uncommon trap, recompiled if it is ever taken), and the hot path is that mode's code and one predictable test. The cost of carrying both is bytecode size, which counts against C2's inlining budget at each call site.
+
 The lock discipline is the field's type, not the class's: a plain read or store of `myInfo` does not compile, and the library makes the only store, inside the claim on the owner, after `compute` returns. In [`Mode.Concurrent`][mode] the store is a release and the read an acquire, so the value is safely published however it was built; in [`Mode.Batch`][mode] both are plain, and a hit is the field read and a null test. `compute` is given [`Sharing.Holds[this.type]`][holds], the evidence for the owner's other writer state. [`Sharing.BlackHole`][blackhole] adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses [`Sharing.once`][sharing] or [`Sharing.claim`][sharing], with the store written by the owner behind a method that takes [`Holds`][holds].
 
 Compared with a Scala 3 `lazy val`, which is also computed once, thread-safely, and left computable if its initialiser throws: a `lazy val` pays for thread safety in every instance (or never, with `@threadUnsafe`), where [`Once`][once] follows the owner's [`Mode`][mode], plain in batch. Its waiters block on the initialising thread with no wait-for graph, so two initialisers that need each other's values on two threads deadlock, where `Once` waits through the [`ClaimRegistry`][claimregistry], which detects the cycle, aborts a victim and reports what each holder was doing. It cannot be reset, where `Once` has `reset()` for invalidation, under the claim. And its initialiser is given no evidence, where `compute` is given [`Holds[this.type]`][holds] for the owner's other writer state. The `lazy val` costs no boilerplate and can hold `null`; `Once` needs a handle and a [`ClaimKind`][claimkind] beside the class, and uses `null` for "not yet".
@@ -91,7 +119,22 @@ object registry extends Sharing.Guard:
 ```
 
 </div>
-<input type="radio" name="guard" id="guard-1"><label for="guard-1"><strong>Mode.Batch</strong></label>
+<input type="radio" name="guard" id="guard-1"><label for="guard-1"><strong>Compiled</strong></label>
+<div class="tab scroll">
+
+```scala
+object registry extends Sharing.Guard:
+  private val byName = mutable.HashMap.empty[String, Entry]   // Guarded erases to the map
+  def add(e: Entry)(using mode: Mode): Unit =
+    if mode.concurrent then registry.synchronized { byName(e.name) = e }
+    else byName(e.name) = e
+  def names(using mode: Mode): List[String] =
+    if mode.concurrent then registry.synchronized { byName.keys.toList }
+    else byName.keys.toList
+```
+
+</div>
+<input type="radio" name="guard" id="guard-2"><label for="guard-2"><strong>Batch path</strong></label>
 <div class="tab">
 
 ```scala
@@ -102,7 +145,7 @@ object registry extends Sharing.Guard:
 ```
 
 </div>
-<input type="radio" name="guard" id="guard-2"><label for="guard-2"><strong>Mode.Concurrent</strong></label>
+<input type="radio" name="guard" id="guard-3"><label for="guard-3"><strong>Concurrent path</strong></label>
 <div class="tab">
 
 ```scala
