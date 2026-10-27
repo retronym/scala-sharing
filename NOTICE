@@ -1,0 +1,3 @@
+scala-sharing
+Derived from the Scala 3 compiler (https://github.com/scala/scala3), Apache License 2.0,
+Copyright (c) École Polytechnique Fédérale de Lausanne (EPFL) and Lightbend, Inc.
