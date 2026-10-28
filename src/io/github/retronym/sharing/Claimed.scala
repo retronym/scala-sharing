@@ -9,20 +9,20 @@ import scala.annotation.targetName
  *  keeps a mutable collection (a `val`) or a value replaced by the one writer (a `var`):
  *
  *  {{{
- *  // a TASTy file's state, under its claim: `Sharing.claimAt[TastyFileClaim](file, kind, this)(...)`
- *  private val symAtAddr: Claimed[TastyFileClaim, mutable.HashMap[Addr, Symbol]] = Claimed.initial(mutable.HashMap())
- *  private var rootOwner: Claimed[TastyFileClaim, Symbol] = Claimed.initial(NoSymbol)
+ *  // an unpickler's state, under the claim on the file it reads: `Sharing.claimAt(this)(file, kind, this)(...)`
+ *  private val symAtAddr: Claimed[this.type, mutable.HashMap[Addr, Symbol]] = Claimed.initial(mutable.HashMap())
+ *  private var rootOwner: Claimed[this.type, Symbol] = Claimed.initial(NoSymbol)
  *
- *  def register(addr: Addr, sym: Symbol)(using Sharing.Holds[TastyFileClaim]): Unit = symAtAddr()(addr) = sym
- *  def enterQuote(owner: Symbol)(using Sharing.Holds[TastyFileClaim]): Unit = rootOwner = Claimed(owner)
+ *  def register(addr: Addr, sym: Symbol)(using Sharing.Holds[this.type]): Unit = symAtAddr()(addr) = sym
+ *  def enterQuote(owner: Symbol)(using Sharing.Holds[this.type]): Unit = rootOwner = Claimed(owner)
  *  }}}
  *
  *  `symAtAddr()` or `Claimed(owner)` outside the claim is an error: "this code must run as the one writer of
- *  TastyFileClaim". The evidence is an inline parameter that neither uses, so they cost nothing at run time, and a
+ *  (TreeUnpickler.this : TreeUnpickler)". The evidence is an inline parameter that neither uses, so they cost nothing at run time, and a
  *  `given` that makes it with [[Sharing.unguarded]] is not evaluated.
  *
- *  `K` is the claim's key, `this.type` for a field keyed by its owner ([[Sharing.claim]]), or a phantom type for a
- *  family of keys ([[Sharing.claimAt]]). `Claimed.initial` makes a value with no evidence, for a field's initialiser,
+ *  `K` is the claim's key, usually `this.type`: the owner, claimed by [[Sharing.claim]] on itself or by
+ *  [[Sharing.claimAt]] on a key computed from it. `Claimed.initial` makes a value with no evidence, for a field's initialiser,
  *  before its owner is shared; nothing stops it elsewhere, so look for it as for `unguarded`. What `c()` returns is
  *  outside the claim: keep a mutable collection's use inside it.
  *

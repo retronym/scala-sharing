@@ -68,7 +68,7 @@ object SharingLincheckTest:
     private val counter = Counter()
 
     @Operation def claim(): Int = Sharing.claim(key)(counter.count())
-    @Operation def claimAt(): Int = Sharing.claimAt[Key](key, Key.kind, key)(counter.count())
+    @Operation def claimAt(): Int = Sharing.claimAt(key)(key, Key.kind, key)(counter.count())
     @Operation def reenter(): Int = Sharing.claim(key)(Sharing.claim(key)(counter.count()))
     @Operation def nested(): Int = Sharing.claim(other)(Sharing.claim(key)(counter.count()))
 
