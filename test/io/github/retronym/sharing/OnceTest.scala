@@ -37,6 +37,19 @@ class OnceTest:
     c.invalidate()
     assertEquals("info 2", c.get)
 
+  @Test def setUnderTheClaim(): Unit =
+    for (m, r) <- List(Mode.Batch -> Concurrency.Serialised.newRegistry(() => Claimant()),
+                       Mode.Concurrent -> Concurrency.Parallel.newRegistry(claimantOfThisThread)) do
+      given Mode = m
+      given ClaimRegistry = r
+      val c = Cell()
+      c.put("given")
+      assertEquals("given", c.info.acquire)
+      assertEquals("given", c.get) // found: not computed
+      c.invalidate()
+      assertNull(c.info.acquire)
+      assertEquals("info 1", c.get)
+
   @Test def reentryIsTheOwnersCycle(): Unit =
     given Mode = Mode.Concurrent
     given ClaimRegistry = Concurrency.Parallel.newRegistry(claimantOfThisThread)
@@ -49,6 +62,7 @@ class OnceTest:
     assertFalse(typeCheckErrors("(Cell()(using Mode.Batch, null).info: String | Null)").isEmpty)
     assertFalse(typeCheckErrors("{ val c = Cell()(using Mode.Batch, null); c.info = null }").isEmpty)
     assertFalse(typeCheckErrors("{ given Mode = Mode.Batch; Cell()(using Mode.Batch, null).info.reset() }").isEmpty)
+    assertFalse(typeCheckErrors("{ given Mode = Mode.Batch; Cell()(using Mode.Batch, null).info.set(\"x\") }").isEmpty)
     // keyed by its class: not a singleton, so no claim key
     assertFalse(typeCheckErrors("{ given Mode = Mode.Batch; given ClaimRegistry = null; ByClass().f.get(\"x\") }").isEmpty)
     // keyed by another object than its owner
@@ -73,6 +87,7 @@ object OnceTest:
     private var computed = 0
     def get: String = info.get { computed += 1; s"info $computed" }
     def invalidate(): Unit = Sharing.claim(this)(info.reset())
+    def put(s: String): Unit = Sharing.claim(this)(info.set(s))
 
   object Cell:
     given Sharing.ClaimKind[Cell] = Sharing.ClaimKind(What("computing info", null), lockWhenSerialised = true)

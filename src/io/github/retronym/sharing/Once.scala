@@ -99,6 +99,17 @@ trait OnceOps:
     inline def peek(using inline mode: Mode): T | Null =
       if mode.concurrent then Once.acquireRaw[T](field) else Once.plainRaw[T](field)
 
+    /** The fact if it is there, else `null`, read with acquire semantics whatever the mode: [[peek]] for code that has
+     *  no [[Mode]] at hand (a `toString`, a predicate of the owner's state). The cost in [[Mode.Batch]] is an acquire
+     *  in place of a plain load, as for a [[Published]] field. */
+    inline def acquire: T | Null = Once.acquireRaw[T](field)
+
+    /** Stores the fact as the one writer, outside `get`: say, from a computation that the fact's own `compute` re-enters,
+     *  or from another writer of the owner that finds the value first. With release semantics in a concurrent mode, as
+     *  `get`'s store, so that a reader that finds it sees what it refers to. */
+    inline def set(inline v: T)(using Holds[K])(using inline mode: Mode): Unit =
+      if mode.concurrent then Once.releaseRaw[T](field, v) else Once.setPlainRaw[K, T](field, v)
+
     /** Forgets the fact, as the one writer, so that the next `get` computes it again. */
     inline def reset()(using Holds[K])(using inline mode: Mode): Unit =
       if mode.concurrent then Once.releaseRaw[T](field, null) else Once.setPlainRaw[K, T](field, null)
