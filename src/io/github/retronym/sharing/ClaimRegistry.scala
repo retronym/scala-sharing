@@ -59,8 +59,11 @@ class Cancelled extends scala.util.control.ControlThrowable
  *
  *  @param kind    a short phrase for the activity
  *  @param subject what the activity is on, or `null`
+ *  @param coarse  whether the claim guards much more than any one waiter needs (a whole file's lazy reads, the
+ *                 inherited members of a class): a wait-for cycle through it is then likely a false dependency, which
+ *                 [[PerKeyClaims]] breaks after a bound even when no party can abort
  */
-class What(val kind: String, val subject: AnyRef | Null):
+class What(val kind: String, val subject: AnyRef | Null, val coarse: Boolean = false):
   /** The activity as text, for a report. */
   final def render: String = subject match
     case null => kind

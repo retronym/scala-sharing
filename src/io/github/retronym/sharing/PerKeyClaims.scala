@@ -15,10 +15,12 @@ import scala.jdk.CollectionConverters.*
  *  as `Claimant` says. The check runs at every slice of a wait, since another claimant's wait may start after this
  *  one's.
  *
- *  @param currentClaimant the claimant of the calling thread
- *  @param cycles          what a claim does with a wait-for cycle it reports
+ *  @param currentClaimant      the claimant of the calling thread
+ *  @param cycles               what a claim does with a wait-for cycle it reports
+ *  @param coarseCycleWaitNanos how long a claimant that cannot abort waits on a cycle through a coarse claim
+ *                              (`What.coarse`) before it aborts after all; 0 for never
  */
-final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler) extends ClaimRegistry:
+final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler, coarseCycleWaitNanos: Long = 0L) extends ClaimRegistry:
   import PerKeyClaims.Claim
 
   def this(currentClaimant: () => Claimant) = this(currentClaimant, AbortVictim)
@@ -35,12 +37,14 @@ final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler) 
     val me = currentClaimant()
     var waitedSince = 0L
     var seen: Claim | Null = null
+    var cycleSince = 0L
     var lastChain: List[Claim] | Null = null
     while true do
       val c = claims.get(key)
       if c == null then
         val mine = Claim(me, what, Thread.currentThread.nn.getName.nn)
         if claims.putIfAbsent(key, mine) == null then
+          me.acquired()
           if waitedSince != 0L then
             val s = seen.nn
             me.recordWait(System.nanoTime() - waitedSince, s.what.render, s.ownerName)
@@ -54,14 +58,17 @@ final class PerKeyClaims(currentClaimant: () => Claimant, cycles: CycleHandler) 
           seen = c
         cycleChain(me, c) match
           case null =>
+            cycleSince = 0L
             lastChain = null
           case chain =>
             val parties = chain.map(_.owner)
-            if me.canAbort then
-              me.aborted += 1
-              throw Cancelled()
+            if me.canAbort then me.abort()
             else if parties.exists(_.canAbort) then
               () // a party that can abort does so at its next look: wait
+            else if coarseCycleWaitNanos > 0L && chain.exists(_.what.coarse) then
+              // through a coarse claim: its owner likely finishes without what this claimant holds; wait, bounded
+              if cycleSince == 0L then cycleSince = System.nanoTime()
+              else if System.nanoTime() - cycleSince > coarseCycleWaitNanos then me.abort()
             else if parties.forall(p => System.identityHashCode(p.thread) <= System.identityHashCode(me.thread)) then
               // one party reports the cycle (a fixed order of the threads picks it). The chain is read from fields
               // the claimants change as they go: only one seen at two looks, a slice apart, with the same claims, is
