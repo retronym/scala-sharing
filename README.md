@@ -103,6 +103,8 @@ def info: Info =
 
 The lock discipline is the field's type, not the class's: a plain read or store of `myInfo` does not compile, and the library makes the only store, inside the claim on the owner, after `compute` returns. In [`Mode.Concurrent`][mode] the store is a release and the read an acquire, so the value is safely published however it was built; in [`Mode.Batch`][mode] both are plain, and a hit is the field read and a null test. `compute` is given [`Sharing.Holds[this.type]`][holds], the evidence for the owner's other writer state. [`Sharing.BlackHole`][blackhole] adds re-entry detection: a computation entered again by its own owner is a cycle, and one that unwinds leaves the fact computable. A fact keyed by another object, or that is not one reference, uses [`Sharing.once`][sharing] or [`Sharing.claim`][sharing], with the store written by the owner behind a method that takes [`Holds`][holds].
 
+A key computed per call, which has no singleton type to name (say, the file a TASTy unpickler reads, found from its symbols), is claimed with [`Sharing.claimAt(owner)`][sharing], as the writer of `owner`'s state: its code is given [`Holds[owner.type]`][holds]. That state is kept in [`Claimed[owner.type, T]`][claimed] fields, an opaque type over the value, read with `c()` and stored with `field = Claimed(v)`, both only with the evidence, so the field costs what it did, and holding one owner's claim does not reach another's state. A `Claimed[this.type, T]` field serves [`Sharing.claim`][sharing] on its owner the same way. That the key is the owner's is the caller's to keep: compute it in one place.
+
 Compared with a Scala 3 `lazy val`, which is also computed once, thread-safely, and left computable if its initialiser throws: a `lazy val` pays for thread safety in every instance (or never, with `@threadUnsafe`), where [`Once`][once] follows the owner's [`Mode`][mode], plain in batch. Its waiters block on the initialising thread with no wait-for graph, so two initialisers that need each other's values on two threads deadlock, where `Once` waits through the [`ClaimRegistry`][claimregistry], which detects the cycle, aborts a victim and reports what each holder was doing. It cannot be reset, where `Once` has `reset()` for invalidation, under the claim. And its initialiser is given no evidence, where `compute` is given [`Holds[this.type]`][holds] for the owner's other writer state. The `lazy val` costs no boilerplate and can hold `null`; `Once` needs a handle and a [`ClaimKind`][claimkind] beside the class, and uses `null` for "not yet".
 
 ### State behind a monitor
@@ -267,7 +269,7 @@ given ClaimRegistry = concurrency.newRegistry(() => claimantOfThisThread())
 
 ## Contents
 
-- [`Sharing`][sharing]: [`once`][sharing], [`claim`][sharing], [`claimAt`][sharing], [`Holds`][holds], [`unguarded`][sharing]; [`Guard`][guard], [`Guarded`][guarded], [`GuardedVar`][guardedvar], [`serialised`][sharing], [`locking`][sharing], [`Monitor`][monitor], [`unlocked`][sharing]; [`ClaimKind`][claimkind]; [`BlackHole`][blackhole].
+- [`Sharing`][sharing]: [`once`][sharing], [`claim`][sharing], [`claimAt`][sharing], [`Holds`][holds], [`Claimed`][claimed], [`unguarded`][sharing]; [`Guard`][guard], [`Guarded`][guarded], [`GuardedVar`][guardedvar], [`serialised`][sharing], [`locking`][sharing], [`Monitor`][monitor], [`unlocked`][sharing]; [`ClaimKind`][claimkind]; [`BlackHole`][blackhole].
 - [`Once`][once]: a lazy fact in one field, stored only by the library.
 - [`Published`][published], [`Payload`][payload]: release/acquire fields. `Publish`: release/acquire array slots.
 - [`Stamped`][stamped], [`Stamp`][stamp].
@@ -312,6 +314,7 @@ Apache 2.0. Derived from the Scala 3 compiler; see `NOTICE`.
 [cyclehandler]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing/CycleHandler.html
 [guard]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing/Sharing$$Guard.html
 [guarded]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing.html#Guarded-0
+[claimed]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing.html#Claimed-0
 [guardedvar]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing/Sharing$$GuardedVar.html
 [holds]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing/Sharing$$Holds.html
 [label]: https://retronym.github.io/scala-sharing/io/github/retronym/sharing/Label.html

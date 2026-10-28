@@ -18,8 +18,8 @@ import scala.annotation.implicitNotFound
  *    - **A lazy fact, computed once by one writer while other threads wait for it**: a [[Once]] field (one reference,
  *      keyed by its owner, stored only by the library), [[once]] (a value read without a lock once it is there, keyed
  *      by any object) or [[claim]] (anything else). A [[ClaimKind]] is given beside the key's class and, for
- *      re-entry, a [[BlackHole]]. The writer's state is reached through methods that take the claim's evidence,
- *      `Holds[key.type]`.
+ *      re-entry, a [[BlackHole]]. The writer's state is kept in [[Claimed]] fields, or reached through methods that
+ *      take the claim's evidence, `Holds[key.type]`.
  *    - **A short critical section over a collection or a few fields**: a [[Guard]] whose fields are [[Guarded]], or
  *      [[serialised]] and [[locking]] on another object's monitor. The guarded state is reached with
  *      `Monitor[lock.type]`.
@@ -62,8 +62,8 @@ object Sharing:
    *  `claim(key)`.
    *
    *  A capability in the manner of Clang's `REQUIRES`: state that only the writer may touch is reachable only through a
-   *  method that takes one, so a touch outside the claim does not compile. Only [[claim]], [[once]] and [[unguarded]]
-   *  make one. It is invariant in `K`, so the evidence for one key is not evidence for another. One instance serves every
+   *  method that takes one, so a touch outside the claim does not compile. Only [[claim]], [[claimAt]], [[once]] and
+   *  [[unguarded]] make one. It is invariant in `K`, so the evidence for one key is not evidence for another. One instance serves every
    *  key, so a holder allocates nothing.
    *
    *  The writer's state is private, its writes behind methods that take the evidence:
@@ -75,9 +75,9 @@ object Sharing:
    *  and `set(...)` outside `Sharing.claim(this)` or `Sharing.once(this)` is an error: "this code must run as the one
    *  writer of (LazyRef.this : LazyRef)". At run time the parameter is the one shared `held` object.
    *
-   *  @tparam K the key, usually a singleton type such as `this.type`
+   *  @tparam K the key, usually a singleton type such as `this.type`, or the owner whose state a [[claimAt]] guards
    */
-  @implicitNotFound("this code must run as the one writer of ${K}: inside Sharing.claim or Sharing.once on it, or a completion of it")
+  @implicitNotFound("this code must run as the one writer of ${K}: inside Sharing.claim or Sharing.once on it, Sharing.claimAt(owner) for owner: ${K}, or a completion of it")
   sealed abstract class Holds[K]
   private object held extends Holds[Any]
   /** The evidence, for the library's own operations that take a claim as [[claim]] does (`Once.get`). */
@@ -190,25 +190,38 @@ object Sharing:
     if mode.concurrent then registry.claim(key, kind, if cycleSubject == null then key else cycleSubject.nn, () => op(using h))
     else op(using h)
 
-  /** [[claim]] on a key computed per call (say, a file's root, found from its symbols), which no state is reached by. It
-   *  hands out no evidence, and `key` is evaluated only in a concurrent mode, as in `claim`. The kind is given explicitly,
-   *  since the key has no class to find it through.
+  /** [[claim]] on a key computed per call (say, a file's root, found from its symbols), as the one writer of `owner`'s
+   *  state, with the evidence of it as `Holds[owner.type]`. The key has no singleton type to name, so the evidence names
+   *  the owner whose state the claim guards, kept in [[Claimed]]`[owner.type, T]` fields: holding one owner's claim does
+   *  not reach another's state. That `key` is `owner`'s is the caller's to keep: compute it in one place, from the owner.
+   *  `owner` is not evaluated, and `key` only in a concurrent mode, as in `claim`. The kind is given explicitly, since
+   *  the key has no class to find it through.
    *
    *  {{{
-   *  // the file's address maps, under the claim that its completers take
-   *  Sharing.claimAt(claimKey, Sharing.lazyTastyRead, this)(unpickle0(mode))
+   *  // the unpickler's address maps, under the claim on the file it reads
+   *  private val symAtAddr: Claimed[this.type, mutable.HashMap[Addr, Symbol]] = Claimed.initial(mutable.HashMap())
+   *
+   *  Sharing.claimAt(this)(claimKey, Sharing.lazyTastyRead, this)(unpickle0(mode))
    *  }}}
    *
-   *  Expands to `if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op) else op`.
+   *  A call expands, as `claim`'s does, to
    *
+   *  {{{
+   *  val h = held.asInstanceOf[Holds[K]]
+   *  if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op(using h))
+   *  else op(using h)
+   *  }}}
+   *
+   *  @param owner        whose state the claim guards, as a stable path; its singleton type is the evidence's
    *  @param key          identity of the claim
    *  @param kind         how the claim is taken
    *  @param cycleSubject what to report if waiting for the claim would close a wait-for cycle
-   *  @param op           the code to run as the one writer
+   *  @param op           the code to run as the one writer, given the evidence of it
    */
-  inline def claimAt[T](inline key: AnyRef, inline kind: ClaimKind[Nothing], inline cycleSubject: AnyRef)(inline op: T)(
-      using inline mode: Mode, inline registry: ClaimRegistry): T =
-    if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op) else op
+  inline def claimAt[K <: AnyRef & Singleton](inline owner: K)(inline key: AnyRef, inline kind: ClaimKind[Nothing],
+      inline cycleSubject: AnyRef)[T](inline op: Holds[K] ?=> T)(using inline mode: Mode, inline registry: ClaimRegistry): T =
+    val h = held.asInstanceOf[Holds[K]] // not a given alias, as in `claim`
+    if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op(using h)) else op(using h)
 
   /** A lazy fact keyed by `key`, computed once: the value `peek` finds, or, when it finds none, the value `compute`d as
    *  the one writer of `key` (see [[claim]]).
