@@ -1,6 +1,7 @@
 package io.github.retronym.sharing
 
 import scala.annotation.implicitNotFound
+import scala.compiletime.{error, summonFrom}
 
 /** Operations on state shared between threads, with evidence types that make the guarded state reachable only from
  *  inside them.
@@ -18,8 +19,8 @@ import scala.annotation.implicitNotFound
  *    - **A lazy fact, computed once by one writer while other threads wait for it**: a [[Once]] field (one reference,
  *      keyed by its owner, stored only by the library), [[once]] (a value read without a lock once it is there, keyed
  *      by any object) or [[claim]] (anything else). A [[ClaimKind]] is given beside the key's class and, for
- *      re-entry, a [[BlackHole]]. The writer's state is reached through methods that take the claim's evidence,
- *      `Holds[key.type]`.
+ *      re-entry, a [[BlackHole]]. The writer's state is kept in [[Claimed]] fields, or reached through methods that
+ *      take the claim's evidence, `Holds[key.type]`.
  *    - **A short critical section over a collection or a few fields**: a [[Guard]] whose fields are [[Guarded]], or
  *      [[serialised]] and [[locking]] on another object's monitor. The guarded state is reached with
  *      `Monitor[lock.type]`.
@@ -62,8 +63,8 @@ object Sharing:
    *  `claim(key)`.
    *
    *  A capability in the manner of Clang's `REQUIRES`: state that only the writer may touch is reachable only through a
-   *  method that takes one, so a touch outside the claim does not compile. Only [[claim]], [[once]] and [[unguarded]]
-   *  make one. It is invariant in `K`, so the evidence for one key is not evidence for another. One instance serves every
+   *  method that takes one, so a touch outside the claim does not compile. Only [[claim]], [[claimAt]], [[once]] and
+   *  [[unguarded]] make one. It is invariant in `K`, so the evidence for one key is not evidence for another. One instance serves every
    *  key, so a holder allocates nothing.
    *
    *  The writer's state is private, its writes behind methods that take the evidence:
@@ -75,9 +76,9 @@ object Sharing:
    *  and `set(...)` outside `Sharing.claim(this)` or `Sharing.once(this)` is an error: "this code must run as the one
    *  writer of (LazyRef.this : LazyRef)". At run time the parameter is the one shared `held` object.
    *
-   *  @tparam K the key, usually a singleton type such as `this.type`
+   *  @tparam K the key, usually a singleton type such as `this.type`, or a phantom type for a family of keys ([[claimAt]])
    */
-  @implicitNotFound("this code must run as the one writer of ${K}: inside Sharing.claim or Sharing.once on it, or a completion of it")
+  @implicitNotFound("this code must run as the one writer of ${K}: inside Sharing.claim or Sharing.once on it, Sharing.claimAt[${K}], or a completion of it")
   sealed abstract class Holds[K]
   private object held extends Holds[Any]
   /** The evidence, for the library's own operations that take a claim as [[claim]] does (`Once.get`). */
@@ -190,25 +191,46 @@ object Sharing:
     if mode.concurrent then registry.claim(key, kind, if cycleSubject == null then key else cycleSubject.nn, () => op(using h))
     else op(using h)
 
-  /** [[claim]] on a key computed per call (say, a file's root, found from its symbols), which no state is reached by. It
-   *  hands out no evidence, and `key` is evaluated only in a concurrent mode, as in `claim`. The kind is given explicitly,
-   *  since the key has no class to find it through.
+  /** [[claim]] on a key computed per call (say, a file's root, found from its symbols), with the evidence of it as
+   *  `Holds[K]`. `K` is a phantom type that stands for a family of such keys ("some TASTy file's claim"), since the key
+   *  has no singleton type to name: the state that every key of the family guards is kept in [[Claimed]] fields, reached
+   *  with `Holds[K]`. Give `K` explicitly: a call that leaves it to be inferred (as `Any`), or gives `Any` or `Nothing`,
+   *  is an error. The kind is given explicitly too, since the key has no class to find it through. `key` is evaluated
+   *  only in a concurrent mode, as in `claim`.
    *
    *  {{{
-   *  // the file's address maps, under the claim that its completers take
-   *  Sharing.claimAt(claimKey, Sharing.lazyTastyRead, this)(unpickle0(mode))
+   *  // a family of keys: the file a TASTy unpickler reads, whose address maps its completers fill
+   *  sealed trait TastyFileClaim
+   *  private val symAtAddr: Claimed[TastyFileClaim, mutable.HashMap[Addr, Symbol]] = Claimed.initial(mutable.HashMap())
+   *
+   *  Sharing.claimAt[TastyFileClaim](claimKey, Sharing.lazyTastyRead, this)(unpickle0(mode))
    *  }}}
    *
-   *  Expands to `if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op) else op`.
+   *  The evidence says only that some key of the family is held, not which: `Holds[K]` reaches the state of every key of
+   *  `K`, so the family's state must be reached only through the object whose key it is. A call expands, as `claim`'s
+   *  does, to
    *
+   *  {{{
+   *  val h = held.asInstanceOf[Holds[K]]
+   *  if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op(using h))
+   *  else op(using h)
+   *  }}}
+   *
+   *  @tparam K           the family of keys, a phantom type
    *  @param key          identity of the claim
    *  @param kind         how the claim is taken
    *  @param cycleSubject what to report if waiting for the claim would close a wait-for cycle
-   *  @param op           the code to run as the one writer
+   *  @param op           the code to run as the one writer, given the evidence of it
    */
-  inline def claimAt[T](inline key: AnyRef, inline kind: ClaimKind[Nothing], inline cycleSubject: AnyRef)(inline op: T)(
-      using inline mode: Mode, inline registry: ClaimRegistry): T =
-    if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op) else op
+  inline def claimAt[K](inline key: AnyRef, inline kind: ClaimKind[Nothing], inline cycleSubject: AnyRef)[T](
+      inline op: Holds[K] ?=> T)(using inline mode: Mode, inline registry: ClaimRegistry): T =
+    // left to be inferred, `K` is `Any`: no family at all
+    summonFrom:
+      case _: (K =:= Any) => error("Sharing.claimAt needs its family of keys given explicitly: Sharing.claimAt[K](key, kind, cycleSubject)(op)")
+      case _: (K =:= Nothing) => error("Sharing.claimAt needs its family of keys given explicitly, not Nothing")
+      case _ =>
+    val h = held.asInstanceOf[Holds[K]] // not a given alias, as in `claim`
+    if mode.concurrent then registry.claim(key, kind, cycleSubject, () => op(using h)) else op(using h)
 
   /** A lazy fact keyed by `key`, computed once: the value `peek` finds, or, when it finds none, the value `compute`d as
    *  the one writer of `key` (see [[claim]]).
